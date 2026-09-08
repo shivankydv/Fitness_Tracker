@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Tracker - Goals</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+</head>
+<body style="font-family: 'Inter', sans-serif; background: #f4f6f8; min-height: 100vh; margin: 0; padding: 0;">
+
+<div class="container py-4 px-4 max-width-clear">
+    
+    <div class="row justify-content-center w-100">
+        <div class="col-12 col-lg-9">
+            
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/dashboard"><i class="fas fa-home"></i> Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Goals</li>
+                </ol>
+            </nav>
+            
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 class="fw-bold mb-0">My Goals</h2>
+                
+                <div>
+                    <a href="/goals/new"
+                       class="btn btn-primary fw-bold rounded-pill py-2 px-3">
+                        <i class="fas fa-plus me-2"></i> New Goal
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Flash message -->
+            <div th:if="${flash}" class="alert alert-"
+                 th:classappend="${flashType}">
+                <span th:text="${flash}">Goal created successfully!</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            
+            <!-- Empty state -->
+            <div th:if="${goals.empty}" class="text-center py-5">
+                <div class="empty-state mb-3">
+                    <i class="fas fa-goal"></i>
+                </div>
+                <h3 class="fw-bold mb-2">No goals yet.</h3>
+                <p class="text-body-secondary">Set your first fitness goal to get started.</p>
+                <a href="/goals/new"
+                   class="btn btn-outline-primary rounded-pill py-2 px-4 mt-3">
+                    <i class="fas fa-plus me-2"></i> Create Your First Goal
+                </a>
+            </div>
+            
+            <!-- Goals table -->
+            <div th:unless="${goals.empty}" class="table-responsive">
+                <table class="table table-borderless mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 15%;">Type</th>
+                            <th style="width: 40%;">Title</th>
+                            <th style="width: 15%;">Target</th>
+                            <th style="width: 15%;">Current</th>
+                            <th style="width: 15%;">Progress</th>
+                            <th style="width: 5%;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="goal : ${goals}">
+                            <td>
+                                <span class="goal-type-badge"
+                                      th:class="'badge bg-'
+                                              + ${goal.goalType} == 'DISTANCE' ? 'success'
+                                              : ${goal.goalType} == 'WEIGHT' ? 'primary'
+                                              : ${goal.goalType} == 'ACTIVE_MINUTES' ? 'info'
+                                              : 'secondary'">
+                                    <span th:text="${goal.goalType}">DISTANCE</span>
+                                </span>
+                            </td>
+                            <td><span th:text="${goal.title}">Run 100km</span></td>
+                            <td><span th:text="${goal.targetValue}">100</span> <span th:text="${goal.unit}">km</span></td>
+                            <td><span th:text="${goal.currentValue}">0</span> <span th:text="${goal.unit}">km</span></td>
+                            <td>
+                                <span th:text="${goal.getProgressPercentage() > 0 ? ${goal.getProgressPercentage()} + '%' : '0%'}"
+                                      th:class="'progress-text ${goal.getProgressPercentage() >= 100 ? 'completed' : ''}'"">
+                                    ${goal.getProgressPercentage() == 0 ? '0%' : (goal.getProgressPercentage() >= 100 ? '100%' : ${goal.getProgressPercentage()} + '%')}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a th:href="@{/goals/{id}(id=${goal.id})}"
+                                       class="btn btn-outline-secondary">
+                                        <i class="fas fa-eye me-1"></i> View
+                                    </a>
+                                    <a th:href="@{/goals/{id}/edit(id=${goal.id})}"
+                                       class="btn btn-outline-primary">
+                                        <i class="fas fa-edit me-1"></i> Edit
+                                    </a>
+                                    <form th:action="@{/goals/{id}/delete(id=${goal.id})}" method="POST"
+                                          class="d-inline">
+                                        <button type="submit"
+                                                class="btn btn-outline-danger"
+                                                onclick="return confirm('Delete this goal? This action cannot be undone.)'>
+                                            <i class="fas fa-trash me-1"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Status filters -->
+            <div class="mt-4">
+                <div class="btn-group btn-group-filter" role="group">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill py-2 px-3"
+                            th:classactive="${param.status == null or param.status == 'all'}">
+                        All
+                    </button>
+                    <button type="button" class="btn btn-outline-primary rounded-pill py-2 px-3"
+                            th:classactive="${param.status == 'ACTIVE'}"
+                            th:onclick="${param.status != 'ACTIVE'} | 'window.location.href=\"/goals?status=ACTIVE\"' + (window.location.search.includes('&') ? '&' : '?') + 'status=ACTIVE'"
+                            th:unless="${param.status == 'ACTIVE'}">Active</button>
+                    <button type="button" class="btn btn-outline-warning rounded-pill py-2 px-3"
+                            th:classactive="${param.status == 'COMPLETED'}"
+                            th:onclick="${param.status != 'COMPLETED'} | 'window.location.href=\"/goals?status=COMPLETED\"' + (window.location.search.includes('&') ? '&' : '?') + 'status=COMPLETED'"
+                            th:unless="${param.status == 'COMPLETED'}">Completed</button>
+                    <button type="button" class="btn btn-outline-secondary rounded-pill py-2 px-3"
+                            th:classactive="${param.status == 'PAUSED'}"
+                            th:onclick="${param.status != 'PAUSED'} | 'window.location.href=\"/goals?status=PAUSED\"' + (window.location.search.includes('&') ? '&' : '?') + 'status=PAUSED'"
+                            th:unless="${param.status == 'PAUSED'}">Paused</button>
+                    <button type="button" class="btn btn-outline-danger rounded-pill py-2 px-3"
+                            th:classactive="${param.status == 'CANCELLED'}"
+                            th:onclick="${param.status != 'CANCELLED'} | 'window.location.href=\"/goals?status=CANCELLED\"' + (window.location.search.includes('&') ? '&' : '?') + 'status=CANCELLED'"
+                            th:unless="${param.status == 'CANCELLED'}">Cancelled</button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

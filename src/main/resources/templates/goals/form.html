@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Tracker - Goal Details</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+</head>
+<body style="font-family: 'Inter', sans-serif; background: #f4f6f8; min-height: 100vh; margin: 0; padding: 0;">
+
+<div class="container py-4 px-4 max-width-clear">
+    
+    <div class="row justify-content-center w-100">
+        <div class="col-12 col-lg-7">
+            
+            <div class="card border-0 shadow-sm rounded-3" style="background: #ffffff; margin: 0 auto;">
+                <div class="card-body p-5 p-lg-6">
+                    
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold mb-2" th:if="${goal.id != null}">Edit Goal</h2>
+                        <h2 class="fw-bold mb-2" th:if="${goal.id == null}">New Goal</h2>
+                        <p class="text-secondary small">Set your fitness goal</p>
+                    </div>
+                    
+                    <!-- Flash message -->
+                    <div th:if="${flash}" class="alert alert-"
+                         th:classappend="${flashType}">
+                        <span th:text="${flash}">Goal created successfully!</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    
+                    <form method="POST"
+                          th:action th:if="${goal.id != null}" @{/goals/{id}(__${goal.id})}"
+                          th:action th:if="${goal.id == null}" method="POST"
+                          th:object="${goalRequest}">
+                        
+                        <input type="hidden" th:field="*{id}" />
+                        
+                        <div class="mb-3">
+                            <label for="goalType" class="form-label fw-medium">Goal Type</label>
+                            <select class="form-select form-select-lg" id="goalType" name="goalType" required>
+                                <option value="">Select goal type</option>
+                                <option th:each="type : ${goalTypes}" th:value="${type}" th:text="${type}">DISTANCE</option>
+                            </select>
+                            <div class="invalid-feedback">Goal type is required</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="title" class="form-label fw-medium">Title</label>
+                            <input type="text" class="form-control form-control-lg"
+                                   id="title" name="title"
+                                   th:value="${goal.title}"
+                                   placeholder="e.g. Run 100km"
+                                   required>
+                            <div class="invalid-feedback">Title is required</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="targetValue" class="form-label fw-medium">Target Value</label>
+                            <input type="number" step="0.01" class="form-control form-control-lg"
+                                   id="targetValue" name="targetValue"
+                                   min="0"
+                                   th:value="${goal.targetValue}" required>
+                            <div class="invalid-feedback">Target value must be non-negative</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="currentValue" class="form-label fw-medium">Current Value</label>
+                            <input type="number" step="0.01" class="form-control form-control-lg"
+                                   id="currentValue" name="currentValue"
+                                   min="0"
+                                   th:value="${goal.currentValue}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="unit" class="form-label fw-medium">Unit</label>
+                            <input type="text" class="form-control form-control-lg"
+                                   id="unit" name="unit"
+                                   th:value="${goal.unit}"
+                                   placeholder="e.g. km, kg, minutes"
+                                   maxlength="50">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="deadline" class="form-label fw-medium">Deadline</label>
+                            <input type="date" class="form-control form-control-lg"
+                                   id="deadline" name="deadline"
+                                   th:value="${#temporals.format(goal.deadline, 'yyyy-MM-dd')}"
+                                   required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="status" class="form-label fw-medium">Status</label>
+                            <select class="form-select form-select-lg" id="status" name="status">
+                                <option value="ACTIVE">Active</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="PAUSED">Paused</option>
+                                <option value="CANCELLED">Cancelled</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit"
+                                class="btn btn-primary w-100 py-3 fw-bold rounded-pill mb-0">
+                            <span th:if="${goal.id == null}">Create Goal</span>
+                            <span th:if="${goal.id != null}">Update Goal</span>
+                        </button>
+                        
+                        <a th:href="@{/goals}" class="btn btn-outline-secondary w-100 py-3 fw-bold rounded-pill mt-2">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Goals
+                        </a>
+                        
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

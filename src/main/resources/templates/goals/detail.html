@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Tracker - Goal Details</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+</head>
+<body style="font-family: 'Inter', sans-serif; background: #f4f6f8; min-height: 100vh; margin: 0; padding: 0;">
+
+<div class="container py-4 px-4 max-width-clear">
+    
+    <div class="row justify-content-center w-100">
+        <div class="col-12 col-lg-8">
+            
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/dashboard"><i class="fas fa-home"></i> Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Goal Details</li>
+                </ol>
+            </nav>
+            
+            <div class="card border-0 shadow-sm rounded-3" style="background: #ffffff; margin: 0 auto;">
+                <div class="card-body p-5 p-lg-6">
+                    
+                    <div class="text-center mb-3">
+                        <span class="goal-type-badge"
+                              th:class="'badge bg-'
+                                      + ${goal.goalType} == 'DISTANCE' ? 'success'
+                                      : ${goal.goalType} == 'WEIGHT' ? 'primary'
+                                      : ${goal.goalType} == 'ACTIVE_MINUTES' ? 'info'
+                                      : 'secondary'">
+                            <i class="fas fa-fw"
+                               th:class="'fas fa-'
+                                       + ${goal.goalType} == 'DISTANCE' ? 'target'
+                                       : ${goal.goalType} == 'WEIGHT' ? 'scale'
+                                       : ${goal.goalType} == 'ACTIVE_MINUTES' ? 'timer'
+                                       : 'trophy'">
+                            </i>
+                            <span th:text="${goal.goalType}">DISTANCE</span>
+                        </span>
+                    </div>
+                    
+                    <h2 class="fw-bold mb-3">Goal Details</h2>
+                    
+                    <div class="mb-3">
+                        <p class="text-secondary small">Title</p>
+                        <p class="fw-medium" th:text="${goal.title}">Run 100km</p>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-6 mb-3">
+                            <p class="text-secondary small">Type</p>
+                            <p class="fw-bold" th:text="${goal.goalType}">DISTANCE</p>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <p class="text-secondary small">Status</p>
+                            <p class="fw-bold"
+                               th:class="'badge bg-'
+                                       + ${goal.status == 'COMPLETED' ? 'success'
+                                       : ${goal.status == 'ACTIVE' ? 'primary'
+                                       : ${goal.status == 'PAUSED' ? 'warning'
+                                       : 'secondary'}'}"'>
+                               <span th:text="${goal.status}">ACTIVE</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-6 mb-3">
+                            <p class="text-secondary small">Target</p>
+                            <p class="fw-bold" th:text="${goal.targetValue} + ' ' + ${goal.unit}">100 km</p>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <p class="text-secondary small">Current</p>
+                            <p class="fw-bold" th:text="${goal.currentValue} + ' ' + ${goal.unit}">0 km</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-secondary small">Progress</p>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar"
+                                 th:class="‘progress-bar ’ + (${goal.getProgressPercentage() >= 100 ? ‘progress-bar-success’ : ‘progress-bar-primary’}")
+                                 th:style="‘width: ’ + ${goal.getProgressPercentage()} + ‘%’"
+                                 th:text="${goal.getProgressPercentage() >= 100 ? ‘100%’ : (${goal.getProgressPercentage()} + ‘%’) }">
+                                ${goal.getProgressPercentage() == 0 ? '0%' : (goal.getProgressPercentage() >= 100 ? '100%' : ${goal.getProgressPercentage()} + '%')}
+                            </div>
+                        </div>
+                        <span class="text-secondary small ms-2"
+                              th:text="${goal.getProgressPercentage() >= 100 ? ‘Goal completed!’ : ''}">Goal completed!</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-secondary small">Deadline</p>
+                        <p class="fw-medium" th:text="#{goal.deadline}(format)=${#temporals.format(goal.deadline, 'yyyy-MM-dd')}">2024-12-31</p>
+                    </div>
+                    
+                    <div class="d-flex justify-between mb-3">
+                        <a th:href="@{/goals/{id}(id=${goal.id})}"
+                           class="btn btn-outline-primary rounded-pill py-2 px-3">
+                            <i class="fas fa-edit me-1"></i> Edit
+                        </a>
+                        
+                        <form th:action="@{/goals/{id}/delete(id=${goal.id})}" method="POST"
+                              class="d-inline">
+                            <button type="submit"
+                                    class="btn btn-danger rounded-pill py-2 px-3"
+                                    onclick="return confirm('Delete this goal? This action cannot be undone.)'>
+                                <i class="fas fa-trash me-1"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <a th:href="@{/goals}" class="btn btn-outline-secondary rounded-pill py-2 px-3">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Goals
+                    </a>
+                    
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

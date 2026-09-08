@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Tracker - Register</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+</head>
+<body style="font-family: 'Inter', sans-serif; background: #f4f6f8; min-height: 100vh; margin: 0; padding: 0;">
+
+<div class="container py-5 px-4 max-width-clear">
+    
+    <div class="row justify-content-center w-100">
+        <div class="col-md-7 col-lg-5 col-xl-4">
+            
+            <div class="card border-0 shadow-sm rounded-3" style="background: #ffffff; margin: 0 auto;">
+                <div class="card-body p-5 p-lg-6">
+                    
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold mb-2">Fitness Tracker</h2>
+                        <p class="text-secondary">Create your account</p>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Duplicate email error -->
+                    <div th:if="${param.duplicate}" class="alert alert-danger alert-dismissible fade show mb-3">
+                        <strong>Email already registered</strong>
+                        <span th:text="${param.duplicate}">The email address is already in use.</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    
+    <!-- Validation errors -->
+    <div th:errors="${}" class="alert alert-danger alert-dismissible fade show mb-3"
+         style="display: none;">
+        <strong>Validation errors</strong>
+        <ul>
+            <li th:each="error : ${#fields.errors}" th:text="#{errors.msg}"></li>
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div style="display: block;">
+    </div>
+                    
+                    <form th:action="@{/auth/register}" method="POST" th:object="${registerRequest}" class="mt-4">
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-medium">Name</label>
+                            <input type="text" id="name" name="name"
+                                   class="form-control form-control-lg"
+                                   placeholder="Enter your name"
+                                   required>
+                            <div class="invalid-feedback" th:errors="*{name}">Name is required</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-medium">Email address</label>
+                            <input type="email" id="email" name="email"
+                                   class="form-control form-control-lg"
+                                   placeholder="Enter your email"
+                                   required>
+                            <div class="invalid-feedback" th:errors="*{email}">Valid email is required</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label fw-medium">Password</label>
+                            <input type="password" id="password" name="password"
+                                   class="form-control form-control-lg"
+                                   placeholder="Enter your password"
+                                   required>
+                            <div class="invalid-feedback" th:errors="*{password}">Password must be at least 8 characters</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label fw-medium">Confirm Password</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword"
+                                   class="form-control form-control-lg"
+                                   placeholder="Confirm your password"
+                                   required>
+                            <div class="invalid-feedback" th:errors="*{confirmPassword}">Passwords must match</div>
+                        </div>
+                        
+                        <button type="submit"
+                                class="btn btn-primary w-100 py-3 fw-bold rounded-3">
+                            Create Account
+                        </button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <small class="text-body-secondary">Already have an account? 
+                            <a href="/auth/login" class="fw-bold text-primary">Sign In</a>
+                        </small>
+                    </div>
+                    
+                    <p class="text-center text-secondary small mt-4">
+                        By creating an account, you agree to our terms and privacy policy.
+                    </p>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
