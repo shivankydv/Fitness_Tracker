@@ -3,6 +3,7 @@ package com.fitnesstracker.service;
 import com.fitnesstracker.domain.User;
 import com.fitnesstracker.dto.RegisterRequest;
 import com.fitnesstracker.dto.UserResponse;
+import com.fitnesstracker.exception.ResourceNotFoundException;
 import com.fitnesstracker.exception.UserAlreadyExistsException;
 import com.fitnesstracker.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -58,6 +59,45 @@ public class UserService {
 
     private String normalizeEmail(String email) {
         return email.trim().toLowerCase();
+    }
+
+    @Transactional
+    public UserResponse updateProfile(Long userId, String name, String email) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        String normalizedEmail = normalizeEmail(email);
+        if (!normalizedEmail.equals(user.getEmail()) && emailExists(normalizedEmail)) {
+            throw new IllegalArgumentException("Email already registered: " + normalizedEmail);
+        }
+
+        user.setName(name.trim());
+        user.setEmail(normalizedEmail);
+        User updated = userRepository.save(user);
+        return toResponse(updated);
+    }
+
+    @Transactional
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        // Delete only the authenticated user's account
+        // JPA cascade will handle deletion of owned resources (activities, goals)
+        userRepository.delete(user);
     }
 
     private UserResponse toResponse(User user) {

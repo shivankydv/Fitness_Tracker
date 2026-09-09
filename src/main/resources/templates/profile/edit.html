@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Tracker - Edit Profile</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+</head>
+<body style="font-family: 'Inter', sans-serif; background: #f4f6f8; min-height: 100vh; margin: 0; padding: 0;">
+
+<div class="container py-4 px-4 max-width-clear">
+    
+    <div class="row justify-content-center w-100">
+        <div class="col-12 col-lg-7">
+            
+            <div class="card border-0 shadow-sm rounded-3" style="background: #ffffff; margin: 0 auto;">
+                <div class="card-body p-5 p-lg-6">
+                    
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold mb-2">Edit Profile</h2>
+                        <p class="text-secondary small">Update your account information</p>
+                    </div>
+                    
+                    <!-- Flash message -->
+                    <div th:if="${flash}" class="alert alert-"
+                         th:classappend="${flashType}">
+                        <span th:text="${flash}">Profile updated successfully!</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    
+                    <form th:action="@{/profile}" method="POST" th:object="${request}">
+                        
+                        <input type="hidden" th:field="*{name}" />
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-medium">Name</label>
+                            <input type="text" class="form-control form-control-lg"
+                                   id="name" name="name"
+                                   th:value="${user}"
+                                   maxlength="100"
+                                   required>
+                            <div class="invalid-feedback" th:errors="*{name}">Name is required</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-medium">Email</label>
+                            <input type="email" class="form-control form-control-lg"
+                                   id="email" name="email"
+                                   th:value="${email}"
+                                   maxlength="255"
+                                   required>
+                            <div class="invalid-feedback" th:errors="*{email}">Valid email is required</div>
+                        </div>
+                        
+                        <div class="mb-3 text-secondary small">
+                            <p>Changes to your email may require verification.</p>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-3">
+                            <button type="submit"
+                                    class="btn btn-primary fw-bold rounded-pill py-2 px-4">
+                                <i class="fas fa-save me-2"></i> Save Changes
+                            </button>
+                            <a th:href="@{/profile}" class="btn btn-outline-secondary fw-bold rounded-pill py-2 px-4">
+                                <i class="fas fa-arrow-left me-2"></i> Cancel
+                            </a>
+                        </div>
+                        
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
