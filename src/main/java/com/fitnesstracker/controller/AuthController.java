@@ -32,7 +32,10 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@Valid RegisterRequest registerRequest, BindingResult bindingResult, Model model) {
+    public String registerUser(@Valid @ModelAttribute("registerRequest") RegisterRequest registerRequest, BindingResult bindingResult, Model model) {
+        if (registerRequest.getConfirmPassword() != null && !registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
+            bindingResult.rejectValue("confirmPassword", "error.confirmPassword", "Passwords do not match");
+        }
         if (bindingResult.hasErrors()) {
             return "register";
         }

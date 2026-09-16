@@ -34,17 +34,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     
-    <!-- Validation errors -->
-    <div th:errors="${}" class="alert alert-danger alert-dismissible fade show mb-3"
-         style="display: none;">
-        <strong>Validation errors</strong>
-        <ul>
-            <li th:each="error : ${#fields.errors}" th:text="#{errors.msg}"></li>
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <div style="display: block;">
-    </div>
+    <!-- Validation errors handled per field below -->
                     
                     <form th:action="@{/auth/register}" method="POST" th:object="${registerRequest}" class="mt-4">
                         

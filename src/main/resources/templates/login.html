@@ -33,18 +33,13 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     
-    <!-- Logout message -->
-    <div th:if="${#strings.isEmpty(param.error)}" th:if="${not #{empty}}"
-         class="alert alert-info alert-dismissible fade show mb-3"
-         style="display: block;">
+                    <!-- Logout message -->
+    <div th:if="${message}" class="alert alert-info alert-dismissible fade show mb-3">
         <strong th:text="${message}">You have been successfully logged out.</strong>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <div th:unless="${#strings.isEmpty(param.error)}"
-         style="display: none;">
-    </div>
                     
-                    <form th:action="@{/auth/login}" method="POST" th:object="${}" class="mt-4">
+                    <form th:action="@{/auth/login}" method="POST" class="mt-4">
                         
                         <div class="mb-3">
                             <label for="email" class="form-label fw-medium">Email address</label>
