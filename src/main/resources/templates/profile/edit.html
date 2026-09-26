@@ -31,15 +31,14 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     
-                    <form th:action="@{/profile}" method="POST" th:object="${request}">
-                        
-                        <input type="hidden" th:field="*{name}" />
+                    <form th:action="@{/profile}" method="POST" th:object="${user}">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         
                         <div class="mb-3">
                             <label for="name" class="form-label fw-medium">Name</label>
                             <input type="text" class="form-control form-control-lg"
                                    id="name" name="name"
-                                   th:value="${user}"
+                                   th:value="*{name}"
                                    maxlength="100"
                                    required>
                             <div class="invalid-feedback" th:errors="*{name}">Name is required</div>
@@ -49,7 +48,7 @@
                             <label for="email" class="form-label fw-medium">Email</label>
                             <input type="email" class="form-control form-control-lg"
                                    id="email" name="email"
-                                   th:value="${email}"
+                                   th:value="*{email}"
                                    maxlength="255"
                                    required>
                             <div class="invalid-feedback" th:errors="*{email}">Valid email is required</div>

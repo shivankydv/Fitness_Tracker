@@ -72,21 +72,15 @@
                         <tr th:each="activity : ${activities}">
                             <td>
                                 <span class="activity-type-badge"
-                                      th:class="'badge bg-'
-                                              + ${activity.activityType} == 'RUNNING' ? 'primary'
-                                              : ${activity.activityType} == 'WALKING' ? 'secondary'
-                                              : ${activity.activityType} == 'CYCLING' ? 'success'
-                                              : ${activity.activityType} == 'SWIMMING' ? 'info'
-                                              : ${activity.activityType} == 'STRENGTH' ? 'warning'
-                                              : 'secondary'">
+                                      th:class="${'badge bg-' + (activity.activityType.name() == 'RUNNING' ? 'primary' : activity.activityType.name() == 'WALKING' ? 'secondary' : activity.activityType.name() == 'CYCLING' ? 'success' : activity.activityType.name() == 'SWIMMING' ? 'info' : activity.activityType.name() == 'STRENGTH' ? 'warning' : 'secondary')}">
                                     <span th:text="${activity.activityType}">RUNNING</span>
                                 </span>
                             </td>
                             <td><span th:text="${#temporals.format(activity.activityDate, 'yyyy-MM-dd')}">2024-01-15</span></td>
-                            <td><span th:text="${activity.durationMinutes} min">30 min</span></td>
-                            <td><span th:text="${activity.distanceKm} km">5.00 km</span></td>
+                            <td><span th:text="${activity.durationMinutes} + ' min'">30 min</span></td>
+                            <td><span th:text="${activity.distanceKm} + ' km'">5.00 km</span></td>
                             <td><span th:text="${activity.caloriesBurned}">300</span> kcal</td>
-                            <td><span th:text="${activity.notes ? 'Running in the park' : '-'}">Running in the park</span></td>
+                            <td><span th:text="${activity.notes != null and !activity.notes.isEmpty() ? activity.notes : '-'}">Running in the park</span></td>
                             <td>
                                 <div class="btn-group btn-group-sm">
                                     <a th:href="@{/activities/{id}(id=${activity.id})}"
@@ -97,14 +91,15 @@
                                        class="btn btn-outline-primary">
                                         <i class="fas fa-edit me-1"></i> Edit
                                     </a>
-                                    <form th:action="@{/activities/{id}/delete(id=${activity.id})}" method="POST"
-                                          class="d-inline">
-                                        <button type="submit"
-                                                class="btn btn-outline-danger"
-                                                onclick="return confirm('Delete this activity? This action cannot be undone.)'>
-                                            <i class="fas fa-trash me-1"></i> Delete
-                                        </button>
-                                    </form>
+                                     <form th:action="@{/activities/{id}/delete(id=${activity.id})}" method="POST"
+                                           class="d-inline">
+                                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                         <button type="submit"
+                                                 class="btn btn-outline-danger"
+                                                 onclick="return confirm('Delete this activity? This action cannot be undone.')">
+                                             <i class="fas fa-trash me-1"></i> Delete
+                                         </button>
+                                     </form>
                                 </div>
                             </td>
                         </tr>
@@ -116,21 +111,22 @@
             <div th:if="${totalPages > 1}" class="mt-4">
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-center">
-                        <li class="page-item th:if="${currentPage > 1}"
+                        <li class="page-item" th:if="${currentPage > 1}">
                             <a class="page-link"
                                th:href="@{/activities(page=${currentPage - 1})}" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
                         </li>
-                        <li class="page-item"
-                            th:each="pageNum : ${#numbers.sequence(1, totalPages)}"
-                            th:class="${currentPage == pageNum} ? 'page-item active' : 'page-item'"
+                        <li th:each="pageNum : ${#numbers.sequence(1, totalPages)}"
+                            th:class="${currentPage == pageNum} ? 'page-item active' : 'page-item'">
                             <a class="page-link"
                                th:href="@{/activities(page=${pageNum})}" th:text="${pageNum}">[pageNum]</a>
                         </li>
-                        <li class="page-item th:if="${currentPage < totalPages}"
+                        <li class="page-item" th:if="${currentPage < totalPages}">
                             <a class="page-link"
                                th:href="@{/activities(page=${currentPage + 1})}" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
                         </li>
                     </ul>
                 </nav>

@@ -40,6 +40,7 @@
     </div>
                     
                     <form th:action="@{/auth/login}" method="POST" class="mt-4">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         
                         <div class="mb-3">
                             <label for="email" class="form-label fw-medium">Email address</label>

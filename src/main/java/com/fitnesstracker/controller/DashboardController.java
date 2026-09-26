@@ -92,7 +92,7 @@ public class DashboardController {
         // Weekly activity summary
         Map<String, Integer> weeklySummary = calculateWeeklySummary(user, activityService);
 
-        // Add attributes to model
+        model.addAttribute("username", userDetails.getUser().getName());
         model.addAttribute("totalActivities", totalActivities);
         model.addAttribute("recentCount", recentCount);
         model.addAttribute("totalCalories", totalCalories);
@@ -106,19 +106,15 @@ public class DashboardController {
         model.addAttribute("recentActivities", recentActivities);
         model.addAttribute("activityTypes", ActivityType.values());
 
-        return "dashboard::main-content";
+        return "dashboard";
     }
 
     private int calculateStreak(User user, ActivityService activityService) {
         // Calculate the current workout streak (consecutive days with at least one activity)
-        // Get all activities sorted by date descending
         List<ActivityResponse> recent = activityService.getRecentActivities(user);
         if (recent.isEmpty()) {
             return 0;
         }
-
-        // Sort by date descending
-        recent.sort((a, b) -> b.getActivityDate().compareTo(a.getActivityDate()));
 
         Set<LocalDate> activeDays = new HashSet<>();
         for (ActivityResponse activity : recent) {

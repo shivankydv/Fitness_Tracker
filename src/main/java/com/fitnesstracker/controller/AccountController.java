@@ -20,6 +20,11 @@ public class AccountController {
         this.userService = userService;
     }
 
+    @GetMapping
+    public String deleteAccountForm() {
+        return "settings/account";
+    }
+
     @PostMapping("/delete")
     public String deleteAccount(@AuthenticationPrincipal CustomUserDetails userDetails,
                                 Model model,

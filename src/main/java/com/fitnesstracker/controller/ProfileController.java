@@ -56,7 +56,6 @@ public class ProfileController {
 
         User user = userDetails.getUser();
         model.addAttribute("user", user);
-        model.addAttribute("email", user.getEmail());
         return "profile/edit";
     }
 

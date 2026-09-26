@@ -71,6 +71,7 @@ public class GoalController {
         if (userDetails == null) {
             return "redirect:/auth/login";
         }
+        model.addAttribute("goal", new GoalResponse());
         model.addAttribute("goalRequest", new GoalRequest());
         model.addAttribute("goalTypes", GoalType.values());
         return "goals/form";
@@ -87,6 +88,7 @@ public class GoalController {
         }
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("goal", new GoalResponse());
             model.addAttribute("goalTypes", GoalType.values());
             return "goals/form";
         }
@@ -97,6 +99,7 @@ public class GoalController {
             redirectAttributes.addFlashAttribute("flashType", "success");
             return "redirect:/goals";
         } catch (IllegalArgumentException e) {
+            model.addAttribute("goal", new GoalResponse());
             model.addAttribute("goalTypes", GoalType.values());
             bindingResult.reject("error", e.getMessage());
             return "goals/form";
@@ -135,6 +138,15 @@ public class GoalController {
         try {
             GoalResponse goal = goalService.getGoalForUser(id, userDetails.getUser());
             model.addAttribute("goal", goal);
+            GoalRequest request = new GoalRequest();
+            request.setGoalType(goal.getGoalType());
+            request.setTitle(goal.getTitle());
+            request.setTargetValue(goal.getTargetValue());
+            request.setCurrentValue(goal.getCurrentValue());
+            request.setUnit(goal.getUnit());
+            request.setDeadline(goal.getDeadline());
+            request.setStatus(goal.getStatus());
+            model.addAttribute("goalRequest", request);
             model.addAttribute("goalTypes", GoalType.values());
             return "goals/form";
         } catch (ResourceNotFoundException e) {
@@ -156,6 +168,7 @@ public class GoalController {
         }
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("goal", goalService.getGoalForUser(id, userDetails.getUser()));
             model.addAttribute("goalTypes", GoalType.values());
             return "goals/form";
         }
@@ -166,6 +179,7 @@ public class GoalController {
             redirectAttributes.addFlashAttribute("flashType", "success");
             return "redirect:/goals/" + id;
         } catch (IllegalArgumentException e) {
+            model.addAttribute("goal", goalService.getGoalForUser(id, userDetails.getUser()));
             model.addAttribute("goalTypes", GoalType.values());
             bindingResult.reject("error", e.getMessage());
             return "goals/form";

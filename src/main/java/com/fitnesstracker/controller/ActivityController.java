@@ -50,6 +50,7 @@ public class ActivityController {
         if (userDetails == null) {
             return "redirect:/auth/login";
         }
+        model.addAttribute("activity", new ActivityResponse());
         model.addAttribute("activityRequest", new ActivityRequest());
         model.addAttribute("activityTypes", ActivityType.values());
         return "activities/form";
@@ -66,6 +67,7 @@ public class ActivityController {
         }
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("activity", new ActivityResponse());
             model.addAttribute("activityTypes", ActivityType.values());
             return "activities/form";
         }
@@ -77,6 +79,7 @@ public class ActivityController {
             redirectAttributes.addFlashAttribute("flashType", "success");
             return "redirect:/activities";
         } catch (IllegalArgumentException e) {
+            model.addAttribute("activity", new ActivityResponse());
             model.addAttribute("activityTypes", ActivityType.values());
             bindingResult.reject("error", e.getMessage());
             return "activities/form";
@@ -97,7 +100,7 @@ public class ActivityController {
             return "activities/detail";
         } catch (ResourceNotFoundException e) {
             model.addAttribute("errorMessage", e.getMessage());
-            return "error/404";
+            return "error";
         }
     }
 
@@ -112,11 +115,19 @@ public class ActivityController {
         try {
             ActivityResponse activity = activityService.getActivityForUser(id, userDetails.getUser());
             model.addAttribute("activity", activity);
+            ActivityRequest request = new ActivityRequest();
+            request.setActivityType(activity.getActivityType());
+            request.setActivityDate(activity.getActivityDate());
+            request.setDurationMinutes(activity.getDurationMinutes());
+            request.setDistanceKm(activity.getDistanceKm());
+            request.setCaloriesBurned(activity.getCaloriesBurned());
+            request.setNotes(activity.getNotes());
+            model.addAttribute("activityRequest", request);
             model.addAttribute("activityTypes", ActivityType.values());
             return "activities/form";
         } catch (ResourceNotFoundException e) {
             model.addAttribute("errorMessage", e.getMessage());
-            return "error/404";
+            return "error";
         }
     }
 
@@ -132,6 +143,7 @@ public class ActivityController {
         }
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("activity", activityService.getActivityForUser(id, userDetails.getUser()));
             model.addAttribute("activityTypes", ActivityType.values());
             return "activities/form";
         }
@@ -142,6 +154,7 @@ public class ActivityController {
             redirectAttributes.addFlashAttribute("flashType", "success");
             return "redirect:/activities/" + id;
         } catch (IllegalArgumentException e) {
+            model.addAttribute("activity", activityService.getActivityForUser(id, userDetails.getUser()));
             model.addAttribute("activityTypes", ActivityType.values());
             bindingResult.reject("error", e.getMessage());
             return "activities/form";

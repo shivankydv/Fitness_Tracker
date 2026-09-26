@@ -71,11 +71,7 @@
                         <tr th:each="goal : ${goals}">
                             <td>
                                 <span class="goal-type-badge"
-                                      th:class="'badge bg-'
-                                              + ${goal.goalType} == 'DISTANCE' ? 'success'
-                                              : ${goal.goalType} == 'WEIGHT' ? 'primary'
-                                              : ${goal.goalType} == 'ACTIVE_MINUTES' ? 'info'
-                                              : 'secondary'">
+                                      th:class="${'badge bg-' + (goal.goalType.name() == 'DISTANCE' ? 'success' : goal.goalType.name() == 'WEIGHT' ? 'primary' : goal.goalType.name() == 'ACTIVE_MINUTES' ? 'info' : 'secondary')}">
                                     <span th:text="${goal.goalType}">DISTANCE</span>
                                 </span>
                             </td>
@@ -83,9 +79,8 @@
                             <td><span th:text="${goal.targetValue}">100</span> <span th:text="${goal.unit}">km</span></td>
                             <td><span th:text="${goal.currentValue}">0</span> <span th:text="${goal.unit}">km</span></td>
                             <td>
-                                <span th:text="${goal.getProgressPercentage() > 0 ? ${goal.getProgressPercentage()} + '%' : '0%'}"
-                                      th:class="'progress-text ${goal.getProgressPercentage() >= 100 ? 'completed' : ''}'"">
-                                    ${goal.getProgressPercentage() == 0 ? '0%' : (goal.getProgressPercentage() >= 100 ? '100%' : ${goal.getProgressPercentage()} + '%')}
+                                <span th:text="${goal.getProgressPercentage() > 0 ? goal.getProgressPercentage() + '%' : '0%'}"
+                                      th:class="${goal.getProgressPercentage() >= 100 ? 'progress-text completed' : 'progress-text'}">
                                 </span>
                             </td>
                             <td>
@@ -98,14 +93,15 @@
                                        class="btn btn-outline-primary">
                                         <i class="fas fa-edit me-1"></i> Edit
                                     </a>
-                                    <form th:action="@{/goals/{id}/delete(id=${goal.id})}" method="POST"
-                                          class="d-inline">
-                                        <button type="submit"
-                                                class="btn btn-outline-danger"
-                                                onclick="return confirm('Delete this goal? This action cannot be undone.)'>
-                                            <i class="fas fa-trash me-1"></i> Delete
-                                        </button>
-                                    </form>
+                                     <form th:action="@{/goals/{id}/delete(id=${goal.id})}" method="POST"
+                                           class="d-inline">
+                                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                         <button type="submit"
+                                                 class="btn btn-outline-danger"
+                                                 onclick="return confirm('Delete this goal? This action cannot be undone.')">
+                                             <i class="fas fa-trash me-1"></i> Delete
+                                         </button>
+                                     </form>
                                 </div>
                             </td>
                         </tr>
@@ -114,30 +110,30 @@
             </div>
             
             <!-- Status filters -->
-            <div class="mt-4">
-                <div class="btn-group btn-group-filter" role="group">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill py-2 px-3"
-                            th:classactive="${param.status == null or param.status == 'all'}">
-                        All
-                    </button>
-                    <button type="button" class="btn btn-outline-primary rounded-pill py-2 px-3"
-                            th:classactive="${param.status == 'ACTIVE'}"
-                            th:onclick="${param.status != 'ACTIVE'} | 'window.location.href=\"/goals?status=ACTIVE\"' + (window.location.search.includes('&') ? '&' : '?') + 'status=ACTIVE'"
-                            th:unless="${param.status == 'ACTIVE'}">Active</button>
-                    <button type="button" class="btn btn-outline-warning rounded-pill py-2 px-3"
-                            th:classactive="${param.status == 'COMPLETED'}"
-                            th:onclick="${param.status != 'COMPLETED'} | 'window.location.href=\"/goals?status=COMPLETED\"' + (window.location.search.includes('&') ? '&' : '?') + 'status=COMPLETED'"
-                            th:unless="${param.status == 'COMPLETED'}">Completed</button>
-                    <button type="button" class="btn btn-outline-secondary rounded-pill py-2 px-3"
-                            th:classactive="${param.status == 'PAUSED'}"
-                            th:onclick="${param.status != 'PAUSED'} | 'window.location.href=\"/goals?status=PAUSED\"' + (window.location.search.includes('&') ? '&' : '?') + 'status=PAUSED'"
-                            th:unless="${param.status == 'PAUSED'}">Paused</button>
-                    <button type="button" class="btn btn-outline-danger rounded-pill py-2 px-3"
-                            th:classactive="${param.status == 'CANCELLED'}"
-                            th:onclick="${param.status != 'CANCELLED'} | 'window.location.href=\"/goals?status=CANCELLED\"' + (window.location.search.includes('&') ? '&' : '?') + 'status=CANCELLED'"
-                            th:unless="${param.status == 'CANCELLED'}">Cancelled</button>
-                </div>
-            </div>
+                    <div class="mt-4">
+                        <div class="btn-group btn-group-filter" role="group">
+                             <button type="button" class="btn btn-outline-secondary rounded-pill py-2 px-3"
+                                     th:classappend="${param.status == null or param.status == 'all'} ? 'active' : ''"
+                                     th:href="@{/goals(status=all)}">All
+                             </button>
+                             <button type="button" class="btn btn-outline-primary rounded-pill py-2 px-3"
+                                     th:classappend="${param.status == 'ACTIVE'} ? 'active' : ''"
+                                     th:href="@{/goals(status=ACTIVE)}"
+                                     th:unless="${param.status == 'ACTIVE'}">Active</button>
+                             <button type="button" class="btn btn-outline-warning rounded-pill py-2 px-3"
+                                     th:classappend="${param.status == 'COMPLETED'} ? 'active' : ''"
+                                     th:href="@{/goals(status=COMPLETED)}"
+                                     th:unless="${param.status == 'COMPLETED'}">Completed</button>
+                             <button type="button" class="btn btn-outline-secondary rounded-pill py-2 px-3"
+                                     th:classappend="${param.status == 'PAUSED'} ? 'active' : ''"
+                                     th:href="@{/goals(status=PAUSED)}"
+                                     th:unless="${param.status == 'PAUSED'}">Paused</button>
+                             <button type="button" class="btn btn-outline-danger rounded-pill py-2 px-3"
+                                     th:classappend="${param.status == 'CANCELLED'} ? 'active' : ''"
+                                     th:href="@{/goals(status=CANCELLED)}"
+                                     th:unless="${param.status == 'CANCELLED'}">Cancelled</button>
+                        </div>
+                    </div>
             
         </div>
     </div>

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import com.fitnesstracker.domain.User;
 import com.fitnesstracker.security.CustomUserDetails;
-import org.springframework.ui.Model;
 
 @Controller
 @RequestMapping("/settings")

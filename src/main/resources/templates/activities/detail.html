@@ -29,21 +29,9 @@
                     
                     <div class="text-center mb-3">
                         <span class="activity-type-badge"
-                              th:class="'badge bg-'
-                                      + ${activity.activityType} == 'RUNNING' ? 'primary'
-                                      : ${activity.activityType} == 'WALKING' ? 'secondary'
-                                      : ${activity.activityType} == 'CYCLING' ? 'success'
-                                      : ${activity.activityType} == 'SWIMMING' ? 'info'
-                                      : ${activity.activityType} == 'STRENGTH' ? 'warning'
-                                      : 'secondary'">
+                              th:class="${'badge bg-' + (activity.activityType.name() == 'RUNNING' ? 'primary' : activity.activityType.name() == 'WALKING' ? 'secondary' : activity.activityType.name() == 'CYCLING' ? 'success' : activity.activityType.name() == 'SWIMMING' ? 'info' : activity.activityType.name() == 'STRENGTH' ? 'warning' : 'secondary')}">
                             <i class="fas fa-fw"
-                               th:class="'fas fa-'
-                                       + ${activity.activityType} == 'RUNNING' ? 'running'
-                                       : ${activity.activityType} == 'WALKING' ? 'walking'
-                                       : ${activity.activityType} == 'CYCLING' ? 'cycling'
-                                       : ${activity.activityType} == 'SWIMMING' ? 'swimming'
-                                       : ${activity.activityType} == 'STRENGTH' ? 'dumbbell'
-                                       : 'runner'">
+                               th:class="${'fas fa-' + (activity.activityType.name() == 'RUNNING' ? 'running' : activity.activityType.name() == 'WALKING' ? 'walking' : activity.activityType.name() == 'CYCLING' ? 'cycling' : activity.activityType.name() == 'SWIMMING' ? 'swimming' : activity.activityType.name() == 'STRENGTH' ? 'dumbbell' : 'runner')}">
                             </i>
                             <span th:text="${activity.activityType}">RUNNING</span>
                         </span>
@@ -58,24 +46,24 @@
                         </div>
                         <div class="col-6 mb-3">
                             <p class="text-secondary small">Duration</p>
-                            <p class="fw-bold" th:text="${activity.durationMinutes}+' min'">30 min</p>
+                            <p class="fw-bold" th:text="${activity.durationMinutes} + ' min'">30 min</p>
                         </div>
                     </div>
                     
                     <div class="row mb-4">
                         <div class="col-6 mb-3">
                             <p class="text-secondary small">Distance</p>
-                            <p class="fw-bold" th:text="${activity.distanceKm}+' km'">5.00 km</p>
+                            <p class="fw-bold" th:text="${activity.distanceKm} + ' km'">5.00 km</p>
                         </div>
                         <div class="col-6 mb-3">
                             <p class="text-secondary small">Calories Burned</p>
-                            <p class="fw-bold" th:text="${activity.caloriesBurned}+' kcal'">300 kcal</p>
+                            <p class="fw-bold" th:text="${activity.caloriesBurned} + ' kcal'">300 kcal</p>
                         </div>
                     </div>
                     
                     <div class="mb-4">
                         <p class="text-secondary small">Notes</p>
-                        <p th:text="${activity.notes ? '${activity.notes}' : 'No notes'}" class="fw-medium"></p>
+                        <p th:text="${activity.notes != null and !activity.notes.isEmpty() ? activity.notes : 'No notes'}" class="fw-medium"></p>
                     </div>
                     
                     <div class="d-flex justify-content-between mb-3">
@@ -86,9 +74,8 @@
                         
                         <form th:action="@{/activities/{id}/delete(id=${activity.id})}" method="POST"
                               class="d-inline">
-                            <button type="submit"
-                                    class="btn btn-danger rounded-pill py-2 px-3"
-                                    onclick="return confirm('Delete this activity? This action cannot be undone.)'>
+                            <button type="submit" class="btn btn-danger rounded-pill py-2 px-3"
+                                    onclick="return confirm('Delete this activity? This action cannot be undone.')">
                                 <i class="fas fa-trash me-1"></i> Delete
                             </button>
                         </form>

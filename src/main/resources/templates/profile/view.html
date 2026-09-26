@@ -36,7 +36,7 @@
                         
                         <div class="row mb-3">
                             <div class="col-4 text-secondary small">Member since</div>
-                            <div class="col-8"><span th:text="#{profile.memberSince}(date)=${user.createdAt ?: '-'}">2024-01-15</span></div>
+                            <div class="col-8"><span th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'yyyy-MM-dd') : '-'}">2024-01-15</span></div>
                         </div>
                         
                         <div class="row mb-3">

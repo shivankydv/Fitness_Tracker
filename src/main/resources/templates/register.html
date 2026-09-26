@@ -37,6 +37,7 @@
     <!-- Validation errors handled per field below -->
                     
                     <form th:action="@{/auth/register}" method="POST" th:object="${registerRequest}" class="mt-4">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         
                         <div class="mb-3">
                             <label for="name" class="form-label fw-medium">Name</label>
