@@ -3,7 +3,6 @@ package com.fitnesstracker.controller;
 import com.fitnesstracker.domain.enums.ActivityType;
 import com.fitnesstracker.dto.ActivityRequest;
 import com.fitnesstracker.dto.ActivityResponse;
-import com.fitnesstracker.exception.ResourceNotFoundException;
 import com.fitnesstracker.security.CustomUserDetails;
 import com.fitnesstracker.service.ActivityService;
 import org.springframework.data.domain.Page;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
-import java.time.format.DateTimeFormatter;
 
 @Controller
 @RequestMapping("/activities")
@@ -36,6 +34,12 @@ public class ActivityController {
         if (userDetails == null) {
             return "redirect:/auth/login";
         }
+
+        // Enforce maximum page size to prevent abuse
+        if (pageable.getPageSize() > 50) {
+            pageable = PageRequest.of(pageable.getPageNumber(), 50, pageable.getSort());
+        }
+
         Page<ActivityResponse> page = activityService.getUserActivities(
                 userDetails.getUser(), pageable);
         model.addAttribute("activities", page.getContent());
@@ -94,14 +98,9 @@ public class ActivityController {
             return "redirect:/auth/login";
         }
 
-        try {
-            ActivityResponse activity = activityService.getActivityForUser(id, userDetails.getUser());
-            model.addAttribute("activity", activity);
-            return "activities/detail";
-        } catch (ResourceNotFoundException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            return "error";
-        }
+        ActivityResponse activity = activityService.getActivityForUser(id, userDetails.getUser());
+        model.addAttribute("activity", activity);
+        return "activities/detail";
     }
 
     @GetMapping("/{id}/edit")
@@ -112,23 +111,18 @@ public class ActivityController {
             return "redirect:/auth/login";
         }
 
-        try {
-            ActivityResponse activity = activityService.getActivityForUser(id, userDetails.getUser());
-            model.addAttribute("activity", activity);
-            ActivityRequest request = new ActivityRequest();
-            request.setActivityType(activity.getActivityType());
-            request.setActivityDate(activity.getActivityDate());
-            request.setDurationMinutes(activity.getDurationMinutes());
-            request.setDistanceKm(activity.getDistanceKm());
-            request.setCaloriesBurned(activity.getCaloriesBurned());
-            request.setNotes(activity.getNotes());
-            model.addAttribute("activityRequest", request);
-            model.addAttribute("activityTypes", ActivityType.values());
-            return "activities/form";
-        } catch (ResourceNotFoundException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            return "error";
-        }
+        ActivityResponse activity = activityService.getActivityForUser(id, userDetails.getUser());
+        model.addAttribute("activity", activity);
+        ActivityRequest request = new ActivityRequest();
+        request.setActivityType(activity.getActivityType());
+        request.setActivityDate(activity.getActivityDate());
+        request.setDurationMinutes(activity.getDurationMinutes());
+        request.setDistanceKm(activity.getDistanceKm());
+        request.setCaloriesBurned(activity.getCaloriesBurned());
+        request.setNotes(activity.getNotes());
+        model.addAttribute("activityRequest", request);
+        model.addAttribute("activityTypes", ActivityType.values());
+        return "activities/form";
     }
 
     @PostMapping("/{id}")
@@ -148,17 +142,10 @@ public class ActivityController {
             return "activities/form";
         }
 
-        try {
-            ActivityResponse updated = activityService.updateActivity(id, userDetails.getUser(), activityRequest);
-            redirectAttributes.addFlashAttribute("flash", "Activity updated successfully!");
-            redirectAttributes.addFlashAttribute("flashType", "success");
-            return "redirect:/activities/" + id;
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("activity", activityService.getActivityForUser(id, userDetails.getUser()));
-            model.addAttribute("activityTypes", ActivityType.values());
-            bindingResult.reject("error", e.getMessage());
-            return "activities/form";
-        }
+        ActivityResponse updated = activityService.updateActivity(id, userDetails.getUser(), activityRequest);
+        redirectAttributes.addFlashAttribute("flash", "Activity updated successfully!");
+        redirectAttributes.addFlashAttribute("flashType", "success");
+        return "redirect:/activities/" + id;
     }
 
     @PostMapping("/{id}/delete")
@@ -169,15 +156,9 @@ public class ActivityController {
             return "redirect:/auth/login";
         }
 
-        try {
-            activityService.deleteActivity(id, userDetails.getUser());
-            redirectAttributes.addFlashAttribute("flash", "Activity deleted successfully!");
-            redirectAttributes.addFlashAttribute("flashType", "success");
-            return "redirect:/activities";
-        } catch (ResourceNotFoundException e) {
-            redirectAttributes.addFlashAttribute("flash", e.getMessage());
-            redirectAttributes.addFlashAttribute("flashType", "error");
-            return "redirect:/activities";
-        }
+        activityService.deleteActivity(id, userDetails.getUser());
+        redirectAttributes.addFlashAttribute("flash", "Activity deleted successfully!");
+        redirectAttributes.addFlashAttribute("flashType", "success");
+        return "redirect:/activities";
     }
 }

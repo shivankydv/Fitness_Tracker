@@ -52,6 +52,12 @@ public class GoalService {
     }
 
     @Transactional(readOnly = true)
+    public Page<GoalResponse> getUserGoalsByStatus(User user, GoalStatus status, Pageable pageable) {
+        return goalRepository.findByUserAndStatus(user, status, pageable)
+                .map(this::toResponse);
+    }
+
+    @Transactional(readOnly = true)
     public List<GoalResponse> getActiveGoals(User user) {
         return goalRepository.findByUserAndStatusOrderByDeadlineAsc(user, GoalStatus.ACTIVE)
                 .stream()

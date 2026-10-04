@@ -1,5 +1,6 @@
 package com.fitnesstracker.controller;
 
+import com.fitnesstracker.dto.ProfileRequest;
 import com.fitnesstracker.dto.UserResponse;
 import com.fitnesstracker.domain.User;
 import com.fitnesstracker.service.UserService;
@@ -7,12 +8,11 @@ import com.fitnesstracker.security.CustomUserDetails;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import jakarta.validation.*;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/profile")
@@ -22,11 +22,6 @@ public class ProfileController {
 
     public ProfileController(UserService userService) {
         this.userService = userService;
-    }
-
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-        // No custom binding needed - we handle validation manually @RequestParam
     }
 
     @GetMapping
@@ -55,30 +50,32 @@ public class ProfileController {
         }
 
         User user = userDetails.getUser();
-        model.addAttribute("user", user);
+        ProfileRequest profileRequest = new ProfileRequest(user.getName(), user.getEmail());
+        model.addAttribute("profileRequest", profileRequest);
         return "profile/edit";
     }
 
     @PostMapping
     public String updateProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                @RequestParam("name") String name,
-                                @RequestParam("email") String email,
+                                @Valid @ModelAttribute("profileRequest") ProfileRequest profileRequest,
+                                BindingResult bindingResult,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             return "redirect:/auth/login";
         }
 
+        if (bindingResult.hasErrors()) {
+            return "profile/edit";
+        }
+
         try {
-            userService.updateProfile(userDetails.getUser().getId(), name, email);
+            userService.updateProfile(userDetails.getUser().getId(), profileRequest.getName(), profileRequest.getEmail());
             redirectAttributes.addFlashAttribute("flash", "Profile updated successfully!");
             redirectAttributes.addFlashAttribute("flashType", "success");
             return "redirect:/profile";
         } catch (IllegalArgumentException e) {
-            User user = userDetails.getUser();
-            model.addAttribute("user", user);
-            model.addAttribute("email", user.getEmail());
-            model.addAttribute("error", e.getMessage());
+            bindingResult.rejectValue("email", "error.email", e.getMessage());
             return "profile/edit";
         }
     }

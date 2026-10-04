@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -224,5 +225,107 @@ class ActivityServiceTest {
         long count = activityService.countUserActivities(user);
 
         assertThat(count).isEqualTo(5L);
+    }
+
+    @Test
+    void getDashboardStatistics_emptyUser_returnsZeros() {
+        User user = createUser(1L, "user@example.com");
+        when(activityRepository.findByUserOrderByActivityDateDesc(user)).thenReturn(List.of());
+
+        Map<String, Object> stats = activityService.getDashboardStatistics(user);
+
+        assertThat(stats.get("totalActivities")).isEqualTo(0);
+        assertThat(stats.get("recentCount")).isEqualTo(0);
+        assertThat(stats.get("totalCalories")).isEqualTo(0);
+        assertThat((BigDecimal) stats.get("totalDistance")).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(stats.get("totalMinutes")).isEqualTo(0);
+        assertThat(stats.get("streak")).isEqualTo(0);
+        assertThat(stats.get("weeklySummary")).isInstanceOf(Map.class);
+        assertThat(stats.get("recentActivities")).isInstanceOf(List.class);
+    }
+
+    @Test
+    void getDashboardStatistics_singleActivity_returnsCorrectStats() {
+        User user = createUser(1L, "user@example.com");
+        Activity activity = createActivity(1L, user);
+        when(activityRepository.findByUserOrderByActivityDateDesc(user)).thenReturn(List.of(activity));
+
+        Map<String, Object> stats = activityService.getDashboardStatistics(user);
+
+        assertThat(stats.get("totalActivities")).isEqualTo(1);
+        assertThat(stats.get("recentCount")).isEqualTo(1);
+        assertThat(stats.get("totalCalories")).isEqualTo(300);
+        assertThat((BigDecimal) stats.get("totalDistance")).isEqualByComparingTo(new BigDecimal("5.0"));
+        assertThat(stats.get("totalMinutes")).isEqualTo(30);
+        assertThat(stats.get("streak")).isEqualTo(1);
+        assertThat(stats.get("recentActivities")).isInstanceOf(List.class);
+    }
+
+    @Test
+    void getDashboardStatistics_multipleActivities_aggregatesCorrectly() {
+        User user = createUser(1L, "user@example.com");
+        LocalDate today = LocalDate.now();
+        Activity a1 = createActivity(1L, user);
+        a1.setCaloriesBurned(300);
+        a1.setDistanceKm(new BigDecimal("5.0"));
+        a1.setDurationMinutes(30);
+        a1.setActivityDate(today);
+
+        Activity a2 = new Activity(user, ActivityType.WALKING, today.minusDays(1), 60, new BigDecimal("4.0"), 200, "Walk");
+        a2.setId(2L);
+        a2.setCreatedAt(LocalDateTime.now());
+
+        when(activityRepository.findByUserOrderByActivityDateDesc(user)).thenReturn(List.of(a1, a2));
+
+        Map<String, Object> stats = activityService.getDashboardStatistics(user);
+
+        assertThat(stats.get("totalActivities")).isEqualTo(2);
+        assertThat(stats.get("recentCount")).isEqualTo(2);
+        assertThat(stats.get("totalCalories")).isEqualTo(500);
+        assertThat((BigDecimal) stats.get("totalDistance")).isEqualByComparingTo(new BigDecimal("9.0"));
+        assertThat(stats.get("totalMinutes")).isEqualTo(90);
+        assertThat(stats.get("streak")).isEqualTo(2); // consecutive days
+    }
+
+    @Test
+    void getDashboardStatistics_streakCalculation_correct() {
+        User user = createUser(1L, "user@example.com");
+        LocalDate today = LocalDate.now();
+        Activity a1 = createActivity(1L, user);
+        a1.setActivityDate(today);
+        Activity a2 = createActivity(2L, user);
+        a2.setActivityDate(today.minusDays(1));
+        Activity a3 = createActivity(3L, user);
+        a3.setActivityDate(today.minusDays(2));
+
+        when(activityRepository.findByUserOrderByActivityDateDesc(user)).thenReturn(List.of(a1, a2, a3));
+
+        Map<String, Object> stats = activityService.getDashboardStatistics(user);
+
+        assertThat(stats.get("streak")).isEqualTo(3);
+    }
+
+    @Test
+    void getDashboardStatistics_weeklySummary_correct() {
+        User user = createUser(1L, "user@example.com");
+        // Use fixed dates to avoid issues with DayOfWeek.with()
+        LocalDate monday = LocalDate.of(2024, 1, 1); // Monday
+        LocalDate tuesday = LocalDate.of(2024, 1, 2); // Tuesday
+
+        Activity a1 = createActivity(1L, user);
+        a1.setActivityDate(monday);
+        Activity a2 = createActivity(2L, user);
+        a2.setActivityDate(tuesday);
+        Activity a3 = createActivity(3L, user);
+        a3.setActivityDate(tuesday);
+
+        when(activityRepository.findByUserOrderByActivityDateDesc(user)).thenReturn(List.of(a1, a2, a3));
+
+        Map<String, Object> stats = activityService.getDashboardStatistics(user);
+
+        Map<String, Integer> weeklySummary = (Map<String, Integer>) stats.get("weeklySummary");
+        assertThat(weeklySummary.get("MONDAY")).isEqualTo(1);
+        assertThat(weeklySummary.get("TUESDAY")).isEqualTo(2);
+        assertThat(weeklySummary.get("WEDNESDAY")).isEqualTo(0);
     }
 }

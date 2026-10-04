@@ -14,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ActivityService {
@@ -93,6 +95,84 @@ public class ActivityService {
     @Transactional(readOnly = true)
     public long countUserActivities(User user) {
         return activityRepository.countByUser(user);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getDashboardStatistics(User user) {
+        List<Activity> allActivities = activityRepository.findByUserOrderByActivityDateDesc(user);
+
+        Map<String, Object> stats = new LinkedHashMap<>();
+
+        // Total activities
+        stats.put("totalActivities", allActivities.size());
+
+        // Recent activities (last 5)
+        List<Activity> recentActivities = allActivities.stream().limit(5).toList();
+        stats.put("recentCount", recentActivities.size());
+        stats.put("recentActivities", recentActivities.stream().map(this::toResponse).toList());
+
+        // Total calories, distance, minutes
+        int totalCalories = allActivities.stream().mapToInt(Activity::getCaloriesBurned).sum();
+        BigDecimal totalDistance = allActivities.stream()
+                .map(Activity::getDistanceKm)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        int totalMinutes = allActivities.stream().mapToInt(Activity::getDurationMinutes).sum();
+
+        stats.put("totalCalories", totalCalories);
+        stats.put("totalDistance", totalDistance);
+        stats.put("totalMinutes", totalMinutes);
+
+        // Current streak
+        stats.put("streak", calculateStreak(allActivities));
+
+        // Weekly summary
+        stats.put("weeklySummary", calculateWeeklySummary(allActivities));
+
+        return stats;
+    }
+
+    private int calculateStreak(List<Activity> activities) {
+        if (activities.isEmpty()) {
+            return 0;
+        }
+
+        Set<LocalDate> activeDays = activities.stream()
+                .map(Activity::getActivityDate)
+                .collect(Collectors.toSet());
+
+        int streak = 0;
+        LocalDate currentDay = LocalDate.now();
+
+        for (int i = 0; i < 30; i++) {
+            if (activeDays.contains(currentDay)) {
+                streak++;
+            } else {
+                break;
+            }
+            currentDay = currentDay.minusDays(1);
+        }
+
+        return streak;
+    }
+
+    private Map<String, Integer> calculateWeeklySummary(List<Activity> activities) {
+        Map<String, Integer> summary = new LinkedHashMap<>();
+        summary.put("SUNDAY", 0);
+        summary.put("MONDAY", 0);
+        summary.put("TUESDAY", 0);
+        summary.put("WEDNESDAY", 0);
+        summary.put("THURSDAY", 0);
+        summary.put("FRIDAY", 0);
+        summary.put("SATURDAY", 0);
+
+        for (Activity activity : activities) {
+            String dayName = activity.getActivityDate().getDayOfWeek().name();
+            if (summary.containsKey(dayName)) {
+                summary.put(dayName, summary.get(dayName) + 1);
+            }
+        }
+
+        return summary;
     }
 
     private void validateActivityRequest(ActivityRequest request) {

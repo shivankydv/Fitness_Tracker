@@ -45,7 +45,7 @@ public class AuthController {
             model.addAttribute("user", userResponse);
             return "redirect:/auth/login?registered";
         } catch (UserAlreadyExistsException e) {
-            bindingResult.reject("registration.email.duplicate", "Email already registered: " + registerRequest.getEmail());
+            bindingResult.rejectValue("email", "error.email", "Email already registered");
             return "register";
         }
     }

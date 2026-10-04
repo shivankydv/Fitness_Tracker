@@ -30,6 +30,8 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
 
     List<Goal> findByUserAndStatus(User user, GoalStatus status);
 
+    Page<Goal> findByUserAndStatus(User user, GoalStatus status, Pageable pageable);
+
     List<Goal> findByUserAndStatusOrderByDeadlineAsc(User user, GoalStatus status);
 
     List<Goal> findByUserOrderByDeadlineAsc(User user);

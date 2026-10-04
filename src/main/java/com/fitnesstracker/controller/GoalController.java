@@ -1,12 +1,13 @@
 package com.fitnesstracker.controller;
 
+import com.fitnesstracker.domain.enums.GoalStatus;
 import com.fitnesstracker.domain.enums.GoalType;
 import com.fitnesstracker.dto.GoalRequest;
 import com.fitnesstracker.dto.GoalResponse;
-import com.fitnesstracker.exception.ResourceNotFoundException;
 import com.fitnesstracker.security.CustomUserDetails;
 import com.fitnesstracker.service.GoalService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
-import java.time.format.DateTimeFormatter;
 
 @Controller
 @RequestMapping("/goals")
@@ -54,15 +54,29 @@ public class GoalController {
     public String listGoals(@AuthenticationPrincipal CustomUserDetails userDetails,
                             Model model,
                             Pageable pageable,
+                            @RequestParam(required = false) GoalStatus status,
                             RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             return "redirect:/auth/login";
         }
-        Page<GoalResponse> page = goalService.getUserGoals(userDetails.getUser(), pageable);
+
+        // Enforce maximum page size to prevent abuse
+        if (pageable.getPageSize() > 50) {
+            pageable = PageRequest.of(pageable.getPageNumber(), 50, pageable.getSort());
+        }
+
+        Page<GoalResponse> page;
+        if (status != null) {
+            page = goalService.getUserGoalsByStatus(userDetails.getUser(), status, pageable);
+        } else {
+            page = goalService.getUserGoals(userDetails.getUser(), pageable);
+        }
+
         model.addAttribute("goals", page.getContent());
         model.addAttribute("currentPage", page.getNumber());
         model.addAttribute("totalPages", page.getTotalPages());
         model.addAttribute("totalItems", page.getTotalElements());
+        model.addAttribute("currentStatus", status);
         return "goals/list";
     }
 
@@ -93,67 +107,46 @@ public class GoalController {
             return "goals/form";
         }
 
-        try {
-            GoalResponse saved = goalService.createGoal(userDetails.getUser(), goalRequest);
-            redirectAttributes.addFlashAttribute("flash", "Goal created successfully!");
-            redirectAttributes.addFlashAttribute("flashType", "success");
-            return "redirect:/goals";
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("goal", new GoalResponse());
-            model.addAttribute("goalTypes", GoalType.values());
-            bindingResult.reject("error", e.getMessage());
-            return "goals/form";
-        }
+        GoalResponse saved = goalService.createGoal(userDetails.getUser(), goalRequest);
+        redirectAttributes.addFlashAttribute("flash", "Goal created successfully!");
+        redirectAttributes.addFlashAttribute("flashType", "success");
+        return "redirect:/goals";
     }
 
     @GetMapping("/{id}")
     public String showGoalDetail(@AuthenticationPrincipal CustomUserDetails userDetails,
                                  @PathVariable Long id,
-                                 Model model,
-                                 RedirectAttributes redirectAttributes) {
+                                 Model model) {
         if (userDetails == null) {
             return "redirect:/auth/login";
         }
 
-        try {
-            GoalResponse goal = goalService.getGoalForUser(id, userDetails.getUser());
-            model.addAttribute("goal", goal);
-            return "goals/detail";
-        } catch (ResourceNotFoundException e) {
-            redirectAttributes.addFlashAttribute("flash", e.getMessage());
-            redirectAttributes.addFlashAttribute("flashType", "error");
-            return "redirect:/goals";
-        }
+        GoalResponse goal = goalService.getGoalForUser(id, userDetails.getUser());
+        model.addAttribute("goal", goal);
+        return "goals/detail";
     }
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@AuthenticationPrincipal CustomUserDetails userDetails,
                                @PathVariable Long id,
-                               Model model,
-                               RedirectAttributes redirectAttributes) {
+                               Model model) {
         if (userDetails == null) {
             return "redirect:/auth/login";
         }
 
-        try {
-            GoalResponse goal = goalService.getGoalForUser(id, userDetails.getUser());
-            model.addAttribute("goal", goal);
-            GoalRequest request = new GoalRequest();
-            request.setGoalType(goal.getGoalType());
-            request.setTitle(goal.getTitle());
-            request.setTargetValue(goal.getTargetValue());
-            request.setCurrentValue(goal.getCurrentValue());
-            request.setUnit(goal.getUnit());
-            request.setDeadline(goal.getDeadline());
-            request.setStatus(goal.getStatus());
-            model.addAttribute("goalRequest", request);
-            model.addAttribute("goalTypes", GoalType.values());
-            return "goals/form";
-        } catch (ResourceNotFoundException e) {
-            redirectAttributes.addFlashAttribute("flash", e.getMessage());
-            redirectAttributes.addFlashAttribute("flashType", "error");
-            return "redirect:/goals";
-        }
+        GoalResponse goal = goalService.getGoalForUser(id, userDetails.getUser());
+        model.addAttribute("goal", goal);
+        GoalRequest request = new GoalRequest();
+        request.setGoalType(goal.getGoalType());
+        request.setTitle(goal.getTitle());
+        request.setTargetValue(goal.getTargetValue());
+        request.setCurrentValue(goal.getCurrentValue());
+        request.setUnit(goal.getUnit());
+        request.setDeadline(goal.getDeadline());
+        request.setStatus(goal.getStatus());
+        model.addAttribute("goalRequest", request);
+        model.addAttribute("goalTypes", GoalType.values());
+        return "goals/form";
     }
 
     @PostMapping("/{id}")
@@ -173,17 +166,10 @@ public class GoalController {
             return "goals/form";
         }
 
-        try {
-            GoalResponse updated = goalService.updateGoal(id, userDetails.getUser(), goalRequest);
-            redirectAttributes.addFlashAttribute("flash", "Goal updated successfully!");
-            redirectAttributes.addFlashAttribute("flashType", "success");
-            return "redirect:/goals/" + id;
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("goal", goalService.getGoalForUser(id, userDetails.getUser()));
-            model.addAttribute("goalTypes", GoalType.values());
-            bindingResult.reject("error", e.getMessage());
-            return "goals/form";
-        }
+        GoalResponse updated = goalService.updateGoal(id, userDetails.getUser(), goalRequest);
+        redirectAttributes.addFlashAttribute("flash", "Goal updated successfully!");
+        redirectAttributes.addFlashAttribute("flashType", "success");
+        return "redirect:/goals/" + id;
     }
 
     @PostMapping("/{id}/delete")
@@ -194,15 +180,9 @@ public class GoalController {
             return "redirect:/auth/login";
         }
 
-        try {
-            goalService.deleteGoal(id, userDetails.getUser());
-            redirectAttributes.addFlashAttribute("flash", "Goal deleted successfully!");
-            redirectAttributes.addFlashAttribute("flashType", "success");
-            return "redirect:/goals";
-        } catch (ResourceNotFoundException e) {
-            redirectAttributes.addFlashAttribute("flash", e.getMessage());
-            redirectAttributes.addFlashAttribute("flashType", "error");
-            return "redirect:/goals";
-        }
+        goalService.deleteGoal(id, userDetails.getUser());
+        redirectAttributes.addFlashAttribute("flash", "Goal deleted successfully!");
+        redirectAttributes.addFlashAttribute("flashType", "success");
+        return "redirect:/goals";
     }
 }

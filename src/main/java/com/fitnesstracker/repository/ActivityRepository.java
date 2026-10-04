@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,4 +29,6 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     int deleteByIdAndUser(Long id, User user);
 
     List<Activity> findTop10ByUserOrderByActivityDateDesc(User user);
+
+    List<Activity> findByUserAndActivityDateBetween(User user, LocalDate startDate, LocalDate endDate);
 }
