@@ -37,6 +37,8 @@ a{color:inherit}
 }
 .brand{display:flex;align-items:center;gap:10px;padding:4px 10px}
 .brand-mark{width:32px;height:32px;border-radius:9px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:800}
+.brand-logo{width:36px;height:36px;border-radius:10px;display:block;flex:0 0 36px}
+.auth-logo{width:44px;height:44px;border-radius:12px;display:block}
 .brand-name{font-weight:800;letter-spacing:.08em;font-size:13px}
 .brand-sub{font-size:10px;letter-spacing:.14em;color:var(--emerald);border:1px solid var(--line);border-radius:999px;padding:2px 8px;background:#fff}
 .nav-group{margin-top:6px}

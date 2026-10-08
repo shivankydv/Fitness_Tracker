@@ -14,6 +14,7 @@
       <div class="card">
         <form th:action="${goal != null and goal.id != null} ? @{/goals/{id}(id=${goal.id})} : @{/goals}" method="post" th:object="${goalRequest}" class="form">
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <div th:if="${#fields.hasGlobalErrors()}" class="alert danger"><span th:each="e : ${#fields.globalErrors()}" th:text="${e}">Error</span></div>
           <div class="row2">
             <div>
               <label class="label" for="goalType">GOAL CATEGORY</label>
@@ -21,6 +22,7 @@
                 <option value="">Select goal type</option>
                 <option th:each="type : ${goalTypes}" th:value="${type}" th:text="${type}" th:selected="${goalRequest != null and goalRequest.goalType == type}">DISTANCE</option>
               </select>
+              <div class="field-error" th:if="${#fields.hasErrors('goalType')}" th:errors="*{goalType}">Type error</div>
             </div>
             <div>
               <label class="label" for="status">STATUS</label>
@@ -36,25 +38,30 @@
           <div>
             <label class="label" for="title">TARGET OBJECTIVE TITLE (1–200)</label>
             <input class="input" type="text" id="title" name="title" th:value="${goalRequest?.title}" placeholder="e.g., Sub-20 Min 5K Pace Split" required maxlength="200"/>
+            <div class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Title error</div>
           </div>
           <div class="row2">
             <div>
               <label class="label" for="targetValue">TARGET METRIC &amp; VALUE (≥0)</label>
               <input class="input" type="number" step="0.01" id="targetValue" name="targetValue" min="0" th:value="${goalRequest?.targetValue}" required/>
+              <div class="field-error" th:if="${#fields.hasErrors('targetValue')}" th:errors="*{targetValue}">Target error</div>
             </div>
             <div>
               <label class="label" for="currentValue">CURRENT VALUE (≥0)</label>
               <input class="input" type="number" step="0.01" id="currentValue" name="currentValue" min="0" th:value="${goalRequest?.currentValue}"/>
+              <div class="field-error" th:if="${#fields.hasErrors('currentValue')}" th:errors="*{currentValue}">Current error</div>
             </div>
           </div>
           <div class="row2">
             <div>
               <label class="label" for="unit">UNIT (≤50, e.g. km, kg, min)</label>
               <input class="input" type="text" id="unit" name="unit" th:value="${goalRequest?.unit}" maxlength="50"/>
+              <div class="field-error" th:if="${#fields.hasErrors('unit')}" th:errors="*{unit}">Unit error</div>
             </div>
             <div>
               <label class="label" for="deadline">DEADLINE</label>
               <input class="input" type="date" id="deadline" name="deadline" th:value="${goalRequest != null and goalRequest.deadline != null ? #temporals.format(goalRequest.deadline, 'yyyy-MM-dd') : ''}" required/>
+              <div class="field-error" th:if="${#fields.hasErrors('deadline')}" th:errors="*{deadline}">Deadline error</div>
             </div>
           </div>
           <div style="display:flex;gap:10px">

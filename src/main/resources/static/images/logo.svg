@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Fitness Tracker logo">
+  <rect width="64" height="64" rx="14" fill="#0e4d2c"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M20 46 C22 34 28 26 40 22" stroke="#f4e8cf" stroke-width="3.5"/>
+    <path d="M20 46 C24 38 30 32 38 30" stroke="#b98e3e" stroke-width="2.4"/>
+    <path d="M18 50 C26 50 34 46 44 38" stroke="#ffffff" stroke-width="3.2" opacity="0.92"/>
+    <path d="M18 50 C26 48 32 45 40 40" stroke="#b98e3e" stroke-width="1.8"/>
+    <circle cx="44" cy="16" r="6" fill="#b98e3e"/>
+    <circle cx="44" cy="16" r="6" fill="none" stroke="#f4e8cf" stroke-width="1.4"/>
+    <path d="M30 22 C32 18 36 16 40 16" stroke="#ffffff" stroke-width="2.4" opacity="0.9"/>
+  </g>
+</svg>
