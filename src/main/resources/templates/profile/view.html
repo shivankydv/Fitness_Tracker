@@ -1,76 +1,42 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitness Tracker - Profile</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
-</head>
-<body style="font-family: 'Inter', sans-serif; background: #f4f6f8; min-height: 100vh; margin: 0; padding: 0;">
-
-<div class="container py-4 px-4 max-width-clear">
-    
-    <div class="row justify-content-center w-100">
-        <div class="col-12 col-lg-7">
-            
-            <div class="card border-0 shadow-sm rounded-3" style="background: #ffffff; margin: 0 auto;">
-                <div class="card-body p-5 p-lg-6">
-                    
-                    <div class="text-center mb-4">
-                        <h2 class="fw-bold mb-2">My Profile</h2>
-                        <p class="text-secondary small">Account details</p>
-                    </div>
-                    
-                    <!-- Flash message -->
-                    <div th:if="${flash}" class="alert alert-"
-                         th:classappend="${flashType}">
-                        <span th:text="${flash}">Profile updated successfully!</span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <h4 class="fw-bold mb-3">Account Information</h4>
-                        
-                        <div class="row mb-3">
-                            <div class="col-4 text-secondary small">Member since</div>
-                            <div class="col-8"><span th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'yyyy-MM-dd') : '-'}">2024-01-15</span></div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-4 text-secondary small">Username</div>
-                            <div class="col-8"><span th:text="${user.name}">Username</span></div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-4 text-secondary small">Email</div>
-                            <div class="col-8"><a href="mailto:#{profile.email}" th:text="${user.email}">email@example.com</a></div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-4 text-secondary small">Member ID</div>
-                            <div class="col-8"><strong th:text="${user.id}">12345</strong></div>
-                        </div>
-                    </div>
-                    
-                    <div class="text-center">
-                        <a href="/profile/edit"
-                           class="btn btn-primary fw-bold rounded-pill py-2 px-4">
-                            <i class="fas fa-edit me-2"></i> Edit Profile
-                        </a>
-                        <a href="/settings"
-                           class="btn btn-outline-secondary fw-bold rounded-pill py-2 px-4 mt-2">
-                            <i class="fas fa-cog me-2"></i> Settings
-                        </a>
-                    </div>
-                    
-                </div>
-            </div>
+<head th:replace="~{fragments/layout :: head('Profile')}"></head>
+<body>
+<div class="app">
+  <div th:replace="~{fragments/layout :: sidebar('profile')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(${user.name})}"></div>
+    <div th:replace="~{fragments/layout :: mobilenav('profile')}"></div>
+    <div class="content" style="max-width:900px">
+      <div class="muted">PERSONAL › PROFILE OVERVIEW › TELEMETRY RECORD</div>
+      <div th:replace="~{fragments/layout :: flash}"></div>
+      <section class="card" style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+        <div class="avatar" style="width:64px;height:64px;font-size:24px" th:text="${#strings.substring(user.name,0,1)}">S</div>
+        <div style="flex:1;min-width:220px">
+          <h1 style="margin:0;font-size:32px" th:text="${user.name}">Athlete</h1>
+          <div class="muted">Member since <span th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'MMM yyyy') : '-'}">-</span> • ID #<span th:text="${user.id}">0</span></div>
+          <div class="muted" th:text="${user.email}">email</div>
         </div>
+        <div style="display:flex;gap:8px"><a th:href="@{/profile/edit}" class="btn btn-primary btn-sm">Edit Profile</a><a th:href="@{/settings}" class="btn btn-ghost btn-sm">Settings</a></div>
+      </section>
+      <section class="grid g2e">
+        <div class="card"><div class="kicker">PHYSIOLOGICAL PARAMETERS (FROM LEDGER)</div>
+          <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:10px">
+            <div class="card" style="background:var(--surface-2)"><div class="kicker">MEMBER ID</div><strong th:text="${user.id}">0</strong></div>
+            <div class="card" style="background:var(--surface-2)"><div class="kicker">DISPLAY NAME</div><strong th:text="${user.name}">-</strong></div>
+            <div class="card" style="background:var(--surface-2)"><div class="kicker">EMAIL</div><strong th:text="${user.email}" style="word-break:break-all">-</strong></div>
+            <div class="card" style="background:var(--surface-2)"><div class="kicker">UPDATED</div><strong th:text="${user.updatedAt != null ? #temporals.format(user.updatedAt, 'yyyy-MM-dd') : '-'}">-</strong></div>
+          </div>
+          <p class="muted">Height/weight/HR/VO2 in the reference are visual-only — backend User has only name/email/timestamps.</p>
+        </div>
+        <div class="card"><div class="kicker">CONFIGURATION</div><h3>Athlete Parameters</h3>
+          <div class="muted">Full profile editing preserves backend field names.</div>
+          <div style="height:10px"></div>
+          <a th:href="@{/profile/edit}" class="btn btn-primary" style="width:100%">Save Profile Changes →</a>
+        </div>
+      </section>
     </div>
+  </div>
 </div>
-
 </body>
 </html>

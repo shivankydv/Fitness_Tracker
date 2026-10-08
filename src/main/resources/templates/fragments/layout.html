@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(pageTitle)">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="${pageTitle} + ' — Fitness Tracker'">Fitness Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css"/>
+</head>
+<body>
+<!-- Sidebar -->
+<aside th:fragment="sidebar(active)" class="sidebar" aria-label="Primary">
+  <div class="brand">
+    <div class="brand-mark">P</div>
+    <div>
+      <div class="brand-name">FITNESS</div>
+      <div class="brand-sub">TRACKER</div>
+    </div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">OVERVIEW</div>
+    <nav class="nav">
+      <a th:href="@{/dashboard}" th:classappend="${active=='dashboard'} ? ' active' : ''"><span class="ico">▦</span> Dashboard</a>
+    </nav>
+    <div class="nav-label">TRACK</div>
+    <nav class="nav">
+      <a th:href="@{/activities}" th:classappend="${active=='activities'} ? ' active' : ''"><span class="ico">🏃</span> Activities</a>
+      <a th:href="@{/activities}" th:classappend="${active=='workouts'} ? ' active' : ''"><span class="ico">✂</span> Workouts</a>
+      <a th:href="@{/goals}" th:classappend="${active=='goals'} ? ' active' : ''"><span class="ico">⚑</span> Goals</a>
+    </nav>
+    <div class="nav-label">INSIGHTS</div>
+    <nav class="nav">
+      <a th:href="@{/statistics}" th:classappend="${active=='statistics'} ? ' active' : ''"><span class="ico">📊</span> Statistics</a>
+      <a th:href="@{/statistics}" th:classappend="${active=='progress'} ? ' active' : ''"><span class="ico">📈</span> Progress</a>
+    </nav>
+    <div class="nav-label">PERSONAL</div>
+    <nav class="nav">
+      <a th:href="@{/profile}" th:classappend="${active=='profile'} ? ' active' : ''"><span class="ico">○</span> Profile</a>
+      <a th:href="@{/settings}" th:classappend="${active=='settings'} ? ' active' : ''"><span class="ico">⚙</span> Settings</a>
+    </nav>
+  </div>
+  <div class="sidebar-foot">
+    <div class="nav">
+      <a th:href="@{/settings}"><span class="ico">?</span> Help &amp; Support</a>
+      <form th:action="@{/logout}" method="post" style="margin:0">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <button type="submit" class="btn btn-ghost btn-sm" style="width:100%">Sign Out</button>
+      </form>
+    </div>
+  </div>
+</aside>
+
+<!-- Mobile nav -->
+<div th:fragment="mobilenav(active)" class="mobile-bar">
+  <a th:href="@{/dashboard}" th:classappend="${active=='dashboard'} ? ' on' : ''">Dashboard</a>
+  <a th:href="@{/activities}" th:classappend="${active=='activities'} ? ' on' : ''">Activities</a>
+  <a th:href="@{/goals}" th:classappend="${active=='goals'} ? ' on' : ''">Goals</a>
+  <a th:href="@{/statistics}" th:classappend="${active=='statistics'} ? ' on' : ''">Statistics</a>
+  <a th:href="@{/profile}" th:classappend="${active=='profile'} ? ' on' : ''">Profile</a>
+  <a th:href="@{/settings}" th:classappend="${active=='settings'} ? ' on' : ''">Settings</a>
+</div>
+
+<!-- Topbar -->
+<header th:fragment="topbar(displayName)" class="topbar">
+  <div class="crumbs">ATHLETIC TELEMETRY &nbsp;/&nbsp; TODAY</div>
+  <div class="search" aria-hidden="true"><span>⌕</span><input type="text" placeholder="Search metrics, splits…" tabindex="-1" readonly/></div>
+  <a class="icon-btn" th:href="@{/settings}" aria-label="Notifications">🔔</a>
+  <a class="btn btn-primary btn-sm" th:href="@{/activities/new}">+ Log Workout</a>
+  <div class="user-chip">
+    <div class="avatar" th:text="${displayName != null and #strings.length(displayName) > 0 ? #strings.substring(displayName,0,1) : 'A'}">S</div>
+    <div>
+      <div class="nm" th:text="${displayName != null ? displayName : 'Athlete'}">Athlete</div>
+      <div class="rl">PRO ATHLETE</div>
+    </div>
+  </div>
+</header>
+
+<!-- Flash messages: preserves flash/flashType, error, message -->
+<div th:fragment="flash" th:remove="tag">
+  <div th:if="${flash}" class="alert" th:classappend="${flashType == 'success'} ? ' success' : (${flashType == 'danger'} ? ' danger' : ' info')" role="status">
+    <span th:text="${flash}">Done</span>
+  </div>
+  <div th:if="${error}" class="alert danger" role="alert"><strong th:text="${error}">Error</strong></div>
+  <div th:if="${message}" class="alert info" role="status"><span th:text="${message}">Logged out</span></div>
+</div>
+</body>
+</html>

@@ -1,46 +1,121 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitness Tracker - Dashboard</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
-</head>
-<body style="font-family: 'Inter', sans-serif; background: #f4f6f8; min-height: 100vh; margin: 0; padding: 0;">
-
-<div class="container py-5 px-4 max-width-clear">
-    
-    <div class="row justify-content-center w-100">
-        <div class="col-md-7 col-lg-5 col-xl-4">
-            
-            <div class="card border-0 shadow-sm rounded-3" style="background: #ffffff; margin: 0 auto;">
-                <div class="card-body p-5 p-lg-6">
-                    
-                    <div class="text-center mb-4">
-                        <h2 class="fw-bold mb-2">Welcome Back!</h2>
-                        <p class="text-secondary">You are successfully authenticated.</p>
-                    </div>
-                    
-                    <div class="d-flex align-items-center justify-content-center mb-3">
-                        <div class="fw-medium" th:text="'Welcome, ' + ${username}">Welcome, User</div>
-                    </div>
-                    
-                    <p class="text-body-secondary small">Your Fitness Tracker account is active and ready to use.</p>
-                    
-                    <div class="mt-4">
-                        <a href="/activities" class="btn btn-outline-primary me-2">View Activities</a>
-                        <a href="/goals" class="btn btn-outline-secondary">View Goals</a>
-                    </div>
-                    
-                </div>
-            </div>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<div class="app">
+  <div th:replace="~{fragments/layout :: sidebar('dashboard')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(${username})}"></div>
+    <div th:replace="~{fragments/layout :: mobilenav('dashboard')}"></div>
+    <div class="content">
+      <div th:replace="~{fragments/layout :: flash}"></div>
+      <section class="hero">
+        <div>
+          <div class="eyebrow">● BIOMETRIC COMMAND CENTER</div>
+          <h1 class="h1">Good morning, <span th:text="${username}">Shivank</span>.</h1>
+          <p class="sub">Small progress every day becomes extraordinary results.</p>
         </div>
-    </div>
-</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn btn-primary" th:href="@{/activities/new}">+ Log Workout</a>
+          <a class="btn btn-ghost" th:href="@{/statistics}">View Statistics</a>
+        </div>
+      </section>
 
+      <section class="grid g4">
+        <div class="card">
+          <div class="kicker">TOTAL WORKOUTS</div>
+          <div class="stat-num"><span th:text="${totalActivities}">0</span> <span class="stat-unit">sessions</span></div>
+          <div class="muted"><span th:text="${recentCount}">0</span> in recent feed &nbsp; <span class="pill green">↗ active</span></div>
+        </div>
+        <div class="card">
+          <div class="kicker">CALORIES BURNED</div>
+          <div class="stat-num"><span th:text="${totalCalories}">0</span> <span class="stat-unit">kcal</span></div>
+          <div class="muted">Lifetime metabolic output</div>
+        </div>
+        <div class="card">
+          <div class="kicker">ACTIVE MINUTES</div>
+          <div class="stat-num"><span th:text="${totalMinutes}">0</span> <span class="stat-unit">min</span></div>
+          <div class="muted">Total time under load</div>
+        </div>
+        <div class="card">
+          <div class="kicker">CURRENT STREAK</div>
+          <div class="stat-num"><span th:text="${streak}">0</span> <span class="stat-unit">days</span></div>
+          <div class="muted">Total distance: <span th:text="${totalDistance}">0</span> km</div>
+        </div>
+      </section>
+
+      <section class="grid g2">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <div><h3 class="serif" style="font-size:26px">Weekly Activity</h3><div class="muted">Sessions per weekday (server-rendered)</div></div>
+            <span class="pill green">Telemetry live</span>
+          </div>
+          <div class="chart" role="img" aria-label="Weekly activity chart">
+            <div class="col"><div class="b" th:style="'height:' + (${weeklySummary?.MONDAY ?: 0} * 28 + 8) + 'px'"></div><div class="d">Mon <b th:text="${weeklySummary?.MONDAY ?: 0}">0</b></div></div>
+            <div class="col"><div class="b" th:style="'height:' + (${weeklySummary?.TUESDAY ?: 0} * 28 + 8) + 'px'"></div><div class="d">Tue <b th:text="${weeklySummary?.TUESDAY ?: 0}">0</b></div></div>
+            <div class="col"><div class="b" th:style="'height:' + (${weeklySummary?.WEDNESDAY ?: 0} * 28 + 8) + 'px'"></div><div class="d">Wed <b th:text="${weeklySummary?.WEDNESDAY ?: 0}">0</b></div></div>
+            <div class="col"><div class="b" th:style="'height:' + (${weeklySummary?.THURSDAY ?: 0} * 28 + 8) + 'px'"></div><div class="d">Thu <b th:text="${weeklySummary?.THURSDAY ?: 0}">0</b></div></div>
+            <div class="col"><div class="b" th:style="'height:' + (${weeklySummary?.FRIDAY ?: 0} * 28 + 8) + 'px'"></div><div class="d">Fri <b th:text="${weeklySummary?.FRIDAY ?: 0}">0</b></div></div>
+            <div class="col"><div class="b" th:style="'height:' + (${weeklySummary?.SATURDAY ?: 0} * 28 + 8) + 'px'"></div><div class="d">Sat <b th:text="${weeklySummary?.SATURDAY ?: 0}">0</b></div></div>
+            <div class="col"><div class="b" style="background:linear-gradient(180deg,#b98e3e,#e7d6ae)" th:styleappend="'height:' + (${weeklySummary?.SUNDAY ?: 0} * 28 + 8) + 'px'"></div><div class="d">Sun <b th:text="${weeklySummary?.SUNDAY ?: 0}">0</b></div></div>
+          </div>
+          <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:14px">
+            <div class="card" style="background:var(--surface-2)"><div class="kicker">TOTAL VOLUME</div><strong th:text="${totalMinutes} + ' min'">0 min</strong><div class="muted">Active time</div></div>
+            <div class="card" style="background:var(--surface-2)"><div class="kicker">CALORIC BURN</div><strong th:text="${totalCalories} + ' kcal'">0 kcal</strong><div class="muted">Lifetime</div></div>
+            <div class="card" style="background:var(--surface-2)"><div class="kicker">COMPLETED LOADS</div><strong th:text="${totalActivities} + ' Sessions'">0 Sessions</strong><div class="muted">All time</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center"><h3 class="serif" style="font-size:26px">Active Goals</h3><a th:href="@{/goals/new}" class="btn btn-ghost btn-sm">+ NEW GOAL</a></div>
+          <div class="muted"><span th:text="${activeGoalsCount}">0</span> targets in progress • <span th:text="${completedGoalsCount}">0</span> completed</div>
+          <div style="height:12px"></div>
+          <div class="card" style="background:var(--surface-2)">
+            <div style="display:flex;justify-content:space-between"><strong>Avg. goal progress</strong><strong th:text="${avgGoalProgress} + '%'">0%</strong></div>
+            <div class="bar"><span th:style="'width:' + ${avgGoalProgress} + '%'"></span></div>
+            <div class="muted">Derived from active goals average</div>
+          </div>
+          <div style="height:12px"></div>
+          <a th:href="@{/goals}" class="btn btn-ghost" style="width:100%">Manage All Goals →</a>
+          <div style="height:12px"></div>
+          <div class="muted">Tracked types:</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <span class="pill" th:each="t : ${activityTypes}" th:text="${t}">RUNNING</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><h3 class="serif" style="font-size:26px">Recent Activities</h3><div class="muted">Direct synchronized workouts from tracker</div></div>
+          <a th:href="@{/activities}">View All (<span th:text="${totalActivities}">0</span>) →</a>
+        </div>
+        <div style="height:12px"></div>
+        <div th:if="${recentActivities == null or #lists.isEmpty(recentActivities)}" class="empty">
+          <h3>Your first workout is the beginning of your journey.</h3>
+          <p class="muted">Log a session to initialize your trend lines.</p>
+          <a th:href="@{/activities/new}" class="btn btn-primary">+ LOG FIRST WORKOUT</a>
+        </div>
+        <div th:unless="${recentActivities == null or #lists.isEmpty(recentActivities)}" class="table-wrap">
+          <table>
+            <thead><tr><th>ACTIVITY</th><th>METRICS</th><th>ENERGY</th><th>DETAILS</th><th>TIMESTAMP</th><th>ACTIONS</th></tr></thead>
+            <tbody>
+              <tr th:each="a : ${recentActivities}">
+                <td><span class="badge run" th:text="${a.activityType}">RUNNING</span><div class="muted" th:text="${a.notes != null and !#strings.isEmpty(a.notes) ? a.notes : '—'}">—</div></td>
+                <td><strong th:text="${a.distanceKm} + ' km'">0 km</strong> • <span th:text="${a.durationMinutes} + 'm'">0m</span></td>
+                <td th:text="${a.caloriesBurned} + ' kcal'">0 kcal</td>
+                <td class="muted" th:text="${a.activityDate}">2024-01-01</td>
+                <td class="muted" th:text="${a.activityDate}">date</td>
+                <td><div class="actions">
+                  <a class="btn btn-ghost btn-sm" th:href="@{/activities/{id}(id=${a.id})}">View</a>
+                  <a class="btn btn-ghost btn-sm" th:href="@{/activities/{id}/edit(id=${a.id})}">Edit</a>
+                </div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
 </body>
 </html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Statistics')}"></head>
+<body>
+<div class="app">
+  <div th:replace="~{fragments/layout :: sidebar('statistics')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Athlete')}"></div>
+    <div th:replace="~{fragments/layout :: mobilenav('statistics')}"></div>
+    <div class="content">
+      <div class="eyebrow">● TELEMETRY SUITE • BIOMETRIC SYNC</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap">
+        <div><h1 class="serif" style="font-size:38px;margin:0">Your Progress &amp; Statistics</h1><p class="sub">Deep performance analytics from existing activity ledger.</p></div>
+        <div class="tabs">
+          <a th:href="@{/statistics(range='7d')}" th:classappend="${currentRange == '7d'} ? ' on' : ''">7 DAYS</a>
+          <a th:href="@{/statistics(range='30d')}" th:classappend="${currentRange == '30d'} ? ' on' : ''">30 DAYS</a>
+          <a th:href="@{/statistics(range='3m')}" th:classappend="${currentRange == '3m'} ? ' on' : ''">3 MONTHS</a>
+          <a th:href="@{/statistics(range='1y')}" th:classappend="${currentRange == '1y'} ? ' on' : ''">1 YEAR</a>
+        </div>
+      </div>
+
+      <section class="grid g4">
+        <div class="card"><div class="kicker">FREQUENCY</div><div class="stat-num" style="font-size:32px"><span th:text="${stats.totalWorkouts}">0</span><span class="stat-unit">/wk</span></div><div class="muted">Range: <span th:text="${currentRange}">30d</span></div></div>
+        <div class="card"><div class="kicker">BURN TOTAL</div><div class="stat-num" style="font-size:32px"><span th:text="${stats.totalCalories}">0</span><span class="stat-unit"> kcal</span></div><div class="muted">In selected range</div></div>
+        <div class="card"><div class="kicker">ACTIVE TIME</div><div class="stat-num" style="font-size:32px"><span th:text="${stats.activeMinutes}">0</span><span class="stat-unit"> min</span></div><div class="muted">Avg <span th:text="${stats.averageDuration}">0</span> min/session</div></div>
+        <div class="card"><div class="kicker">DISTANCE</div><div class="stat-num" style="font-size:32px"><span th:text="${stats.totalDistance}">0</span><span class="stat-unit"> km</span></div><div class="muted">Streak: <span th:text="${stats.currentStreak}">0</span> days</div></div>
+      </section>
+
+      <section class="grid g2e">
+        <div class="card">
+          <div class="kicker">DISTRIBUTION ANALYSIS</div>
+          <h3 class="serif" style="font-size:24px">Workout Activity &amp; Frequency</h3>
+          <div class="chart">
+            <div class="col" th:each="e : ${stats.activityDistribution}"><div class="b" th:style="'height:' + (${e.value} * 30 + 8) + 'px'"></div><div class="d" th:text="${e.key} + ' ' + ${e.value}">RUN 0</div></div>
+          </div>
+          <div class="muted" style="margin-top:10px">Counts per ActivityType in range (server-computed).</div>
+        </div>
+        <div class="card">
+          <div class="kicker">PERSONAL RECORDS (HALL OF FAME)</div>
+          <h3 class="serif" style="font-size:24px">All-Time Milestones in Range</h3>
+          <div class="grid" style="grid-template-columns:1fr 1fr 1fr;margin-top:12px">
+            <div class="card" style="background:var(--surface-2)"><div class="kicker">LONGEST RUN</div><strong th:text="${stats.personalRecords.longestDistance} + ' km'">0 km</strong></div>
+            <div class="card" style="background:var(--surface-2)"><div class="kicker">MAX DURATION</div><strong th:text="${stats.personalRecords.longestWorkout} + ' min'">0 min</strong></div>
+            <div class="card" style="background:var(--surface-2)"><div class="kicker">PEAK CALORIES</div><strong th:text="${stats.personalRecords.mostCalories} + ' kcal'">0 kcal</strong></div>
+            <div class="card" style="background:var(--surface-2)"><div class="kicker">BEST STREAK</div><strong th:text="${stats.personalRecords.bestStreak} + ' days'">0 days</strong></div>
+            <div class="card" style="background:var(--surface-2)"><div class="kicker">ACTIVE PERIOD</div><strong th:text="${stats.personalRecords.longestActivePeriod} + ' days'">0 days</strong></div>
+            <div class="card" style="background:var(--surface-2)"><div class="kicker">AVG SESSION</div><strong th:text="${stats.averageDuration} + ' min'">0 min</strong></div>
+          </div>
+          <div class="muted" style="margin-top:10px">HR zones / pace curves in the reference are visual-only — backend provides aggregates above.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+</body>
+</html>

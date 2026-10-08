@@ -1,115 +1,34 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitness Tracker - Goal Details</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
-</head>
-<body style="font-family: 'Inter', sans-serif; background: #f4f6f8; min-height: 100vh; margin: 0; padding: 0;">
-
-<div class="container py-4 px-4 max-width-clear">
-    
-    <div class="row justify-content-center w-100">
-        <div class="col-12 col-lg-8">
-            
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/dashboard"><i class="fas fa-home"></i> Home</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Goal Details</li>
-                </ol>
-            </nav>
-            
-            <div class="card border-0 shadow-sm rounded-3" style="background: #ffffff; margin: 0 auto;">
-                <div class="card-body p-5 p-lg-6">
-                    
-                    <div class="text-center mb-3">
-                        <span class="goal-type-badge"
-                              th:class="${'badge bg-' + (goal.goalType.name() == 'DISTANCE' ? 'success' : goal.goalType.name() == 'WEIGHT' ? 'primary' : goal.goalType.name() == 'ACTIVE_MINUTES' ? 'info' : 'secondary')}">
-                            <i class="fas fa-fw"
-                               th:class="${'fas fa-' + (goal.goalType.name() == 'DISTANCE' ? 'target' : goal.goalType.name() == 'WEIGHT' ? 'scale' : goal.goalType.name() == 'ACTIVE_MINUTES' ? 'timer' : 'trophy')}">
-                            </i>
-                            <span th:text="${goal.goalType}">DISTANCE</span>
-                        </span>
-                    </div>
-                    
-                    <h2 class="fw-bold mb-3">Goal Details</h2>
-                    
-                    <div class="mb-3">
-                        <p class="text-secondary small">Title</p>
-                        <p class="fw-medium" th:text="${goal.title}">Run 100km</p>
-                    </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-6 mb-3">
-                            <p class="text-secondary small">Type</p>
-                            <p class="fw-bold" th:text="${goal.goalType}">DISTANCE</p>
-                        </div>
-                        <div class="col-6 mb-3">
-                            <p class="text-secondary small">Status</p>
-                            <p class="fw-bold"
-                               th:class="${'badge bg-' + (goal.status.name() == 'COMPLETED' ? 'success' : goal.status.name() == 'ACTIVE' ? 'primary' : goal.status.name() == 'PAUSED' ? 'warning' : 'secondary')}">
-                               <span th:text="${goal.status}">ACTIVE</span>
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-6 mb-3">
-                            <p class="text-secondary small">Target</p>
-                            <p class="fw-bold" th:text="${goal.targetValue} + ' ' + ${goal.unit}">100 km</p>                        </div>
-                        <div class="col-6 mb-3">
-                            <p class="text-secondary small">Current</p>
-                            <p class="fw-bold" th:text="${goal.currentValue} + ' ' + ${goal.unit}">0 km</p>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <p class="text-secondary small">Progress</p>
-                        <div class="progress" style="height: 20px;">
-                            <div class="progress-bar"
-                                 th:class="${goal.getProgressPercentage() >= 100 ? 'progress-bar-success' : 'progress-bar-primary'}"
-                                 th:style="'width: ' + ${goal.getProgressPercentage()} + '%'"
-                                 th:text="${goal.getProgressPercentage() >= 100 ? '100%' : (goal.getProgressPercentage() + '%')}">
-                            </div>
-                        </div>
-                        <span class="text-secondary small ms-2"
-                              th:text="${goal.getProgressPercentage() >= 100 ? 'Goal completed!' : ''}">Goal completed!</span>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <p class="text-secondary small">Deadline</p>
-                        <p class="fw-medium" th:text="${goal.deadline != null ? #temporals.format(goal.deadline, 'yyyy-MM-dd') : '-'}">2024-12-31</p>
-                    </div>
-                    
-                    <div class="d-flex justify-between mb-3">
-                        <a th:href="@{/goals/{id}(id=${goal.id})}"
-                           class="btn btn-outline-primary rounded-pill py-2 px-3">
-                            <i class="fas fa-edit me-1"></i> Edit
-                        </a>
-                        
-                        <form th:action="@{/goals/{id}/delete(id=${goal.id})}" method="POST"
-                              class="d-inline">
-                            <button type="submit" class="btn btn-danger rounded-pill py-2 px-3"
-                                    onclick="return confirm('Delete this goal? This action cannot be undone.')">
-                                <i class="fas fa-trash me-1"></i> Delete
-                            </button>
-                        </form>
-                    </div>
-                    
-                    <a th:href="@{/goals}" class="btn btn-outline-secondary rounded-pill py-2 px-3">
-                        <i class="fas fa-arrow-left me-1"></i> Back to Goals
-                    </a>
-                    
-                </div>
-            </div>
-            
+<head th:replace="~{fragments/layout :: head('Goal Details')}"></head>
+<body>
+<div class="app">
+  <div th:replace="~{fragments/layout :: sidebar('goals')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Athlete')}"></div>
+    <div th:replace="~{fragments/layout :: mobilenav('goals')}"></div>
+    <div class="content" style="max-width:820px">
+      <div class="muted"><a th:href="@{/dashboard}">Home</a> / <a th:href="@{/goals}">Goals</a> / Details</div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="badge" th:text="${goal.goalType}">DISTANCE</span>
+          <span class="pill green" th:text="${goal.status}">ACTIVE</span>
         </div>
+        <h1 style="font-size:32px;margin:10px 0" th:text="${goal.title}">Goal title</h1>
+        <div class="stat-num"><span th:text="${goal.currentValue}">0</span><span class="stat-unit"> / <span th:text="${goal.targetValue}">100</span> <span th:text="${goal.unit}">km</span></span></div>
+        <div class="bar"><span th:style="'width:' + ${goal.getProgressPercentage()} + '%'"></span></div>
+        <div class="muted" style="margin-top:8px"><span th:text="${goal.getProgressPercentage()} + '%'">0%</span> • Deadline: <span th:text="${goal.deadline != null ? #temporals.format(goal.deadline, 'yyyy-MM-dd') : '-'}">-</span></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+          <a th:href="@{/goals/{id}/edit(id=${goal.id})}" class="btn btn-primary btn-sm">Edit</a>
+          <form th:action="@{/goals/{id}/delete(id=${goal.id})}" method="post" style="display:inline;margin:0">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this goal? This action cannot be undone.')">Delete</button>
+          </form>
+          <a th:href="@{/goals}" class="btn btn-ghost btn-sm">← Back to Goals</a>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
-
 </body>
 </html>

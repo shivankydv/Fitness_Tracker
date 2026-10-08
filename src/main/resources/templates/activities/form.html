@@ -1,107 +1,60 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitness Tracker - Log Activity</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
-</head>
-<body style="font-family: 'Inter', sans-serif; background: #f4f6f8; min-height: 100vh; margin: 0; padding: 0;">
-
-<div class="container py-4 px-4 max-width-clear">
-    
-    <div class="row justify-content-center w-100">
-        <div class="col-12 col-lg-7">
-            
-            <div class="card border-0 shadow-sm rounded-3" style="background: #ffffff; margin: 0 auto;">
-                <div class="card-body p-5 p-lg-6">
-                    
-                    <div class="text-center mb-4">
-                        <h2 class="fw-bold mb-2" th:if="${activity != null and activity.id != null}">Edit Activity</h2>
-                        <h2 class="fw-bold mb-2" th:if="${activity == null or activity.id == null}">Log Activity</h2>
-                        <p class="text-secondary small">Track your workout</p>
-                    </div>
-                    
-                    <!-- Flash message -->
-                    <div th:if="${flash}" class="alert alert-" th:classappend="${flashType}">
-                        <span th:text="${flash}">Activity created successfully!</span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    
-                    <form th:action="${activity != null and activity.id != null} ? @{/activities/{id}(id=${activity.id})} : @{/activities}" method="POST" th:object="${activityRequest}">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                        
-                        <div class="mb-3">
-                            <label for="activityType" class="form-label fw-medium">Activity Type</label>
-                            <select class="form-select form-select-lg" id="activityType" name="activityType" required>
-                                <option value="">Select activity type</option>
-                                <option th:each="type : ${activityTypes}" th:value="${type}" th:text="${type}">RUNNING</option>
-                            </select>
-                            <div class="invalid-feedback">Activity type is required</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="activityDate" class="form-label fw-medium">Activity Date</label>
-                            <input type="date" class="form-control form-control-lg"
-                                   id="activityDate" name="activityDate"
-                                   th:value="${#temporals.format(activity.activityDate, 'yyyy-MM-dd')}"/>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="durationMinutes" class="form-label fw-medium">Duration (minutes)</label>
-                            <input type="number" class="form-control form-control-lg"
-                                   id="durationMinutes" name="durationMinutes"
-                                   min="0" max="1440"
-                                   th:value="${activity.durationMinutes}" required>
-                            <div class="invalid-feedback">Duration must be between 0 and 1440</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="distanceKm" class="form-label fw-medium">Distance (km)</label>
-                            <input type="number" step="0.01" class="form-control form-control-lg"
-                                   id="distanceKm" name="distanceKm"
-                                   min="0"
-                                   th:value="${activity.distanceKm}" required>
-                            <div class="invalid-feedback">Distance must not be negative</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="caloriesBurned" class="form-label fw-medium">Calories Burned</label>
-                            <input type="number" class="form-control form-control-lg"
-                                   id="caloriesBurned" name="caloriesBurned"
-                                   min="0" max="10000"
-                                   th:value="${activity.caloriesBurned}" required>
-                            <div class="invalid-feedback">Calories must be between 0 and 10000</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="notes" class="form-label fw-medium">Notes</label>
-                            <textarea class="form-control form-control-lg"
-                                      id="notes" name="notes"
-                                      rows="3"
-                                      th:value="${activity.notes}"></textarea>
-                        </div>
-                        
-                        <button type="submit"
-                                class="btn btn-primary w-100 py-3 fw-bold rounded-pill mb-0">
-                            <span th:if="${activity.id == null}">Log Activity</span>
-                            <span th:if="${activity.id != null}">Update Activity</span>
-                        </button>
-                        
-                        <a th:href="@{/activities}" class="btn btn-outline-secondary w-100 py-3 fw-bold rounded-pill mt-2">
-                            <i class="fas fa-arrow-left me-2"></i> Back to Activities
-                        </a>
-                        
-                    </form>
-                    
-                </div>
-            </div>
+<head th:replace="~{fragments/layout :: head(${activity != null and activity.id != null} ? 'Edit Activity' : 'Log Activity')}"></head>
+<body>
+<div class="app">
+  <div th:replace="~{fragments/layout :: sidebar('activities')}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Athlete')}"></div>
+    <div th:replace="~{fragments/layout :: mobilenav('activities')}"></div>
+    <div class="content" style="max-width:760px">
+      <div th:replace="~{fragments/layout :: flash}"></div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h2 style="margin:0" th:text="${activity != null and activity.id != null} ? 'Edit Activity' : 'Log New Activity'">Log New Activity</h2>
+          <a th:href="@{/activities}" class="btn btn-ghost btn-sm">✕</a>
         </div>
+        <p class="sub">All fields map 1:1 to the backend ActivityRequest.</p>
+        <!-- Preserves th:object + POST target logic; inputs use name= for binding -->
+        <form th:action="${activity != null and activity.id != null} ? @{/activities/{id}(id=${activity.id})} : @{/activities}" method="post" th:object="${activityRequest}" class="form">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <div>
+            <label class="label" for="activityType">ACTIVITY TYPE</label>
+            <select class="input" id="activityType" name="activityType" required>
+              <option value="">Select activity type</option>
+              <option th:each="type : ${activityTypes}" th:value="${type}" th:text="${type}" th:selected="${activityRequest != null and activityRequest.activityType == type}">RUNNING</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="activityDate">DATE</label>
+            <input class="input" type="date" id="activityDate" name="activityDate" th:value="${activityRequest != null and activityRequest.activityDate != null ? #temporals.format(activityRequest.activityDate, 'yyyy-MM-dd') : (activity != null and activity.activityDate != null ? #temporals.format(activity.activityDate, 'yyyy-MM-dd') : '')}" required/>
+          </div>
+          <div class="row2">
+            <div>
+              <label class="label" for="durationMinutes">DURATION (MINUTES, 0–1440)</label>
+              <input class="input" type="number" id="durationMinutes" name="durationMinutes" min="0" max="1440" th:value="${activityRequest?.durationMinutes}" required/>
+            </div>
+            <div>
+              <label class="label" for="distanceKm">DISTANCE (KM)</label>
+              <input class="input" type="number" step="0.01" id="distanceKm" name="distanceKm" min="0" th:value="${activityRequest?.distanceKm}" required/>
+            </div>
+          </div>
+          <div>
+            <label class="label" for="caloriesBurned">ENERGY BURNED (0–10000 KCAL)</label>
+            <input class="input" type="number" id="caloriesBurned" name="caloriesBurned" min="0" max="10000" th:value="${activityRequest?.caloriesBurned}" required/>
+          </div>
+          <div>
+            <label class="label" for="notes">SESSION NOTES (≤1000 CHARS, VISUAL-ONLY RPE/TAGS OMITTED)</label>
+            <textarea class="input" id="notes" name="notes" rows="3" maxlength="1000" th:text="${activityRequest?.notes}"></textarea>
+          </div>
+          <div style="display:flex;gap:10px">
+            <a th:href="@{/activities}" class="btn btn-ghost" style="flex:1">CANCEL</a>
+            <button type="submit" class="btn btn-primary" style="flex:2" th:text="${activity != null and activity.id != null} ? 'UPDATE ACTIVITY' : 'SAVE WORKOUT'">SAVE WORKOUT</button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
-
 </body>
 </html>
