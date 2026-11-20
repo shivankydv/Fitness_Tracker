@@ -1,0 +1,33 @@
+
+services:
+  db:
+    image: mysql:8.4
+    container_name: fitness-mysql
+    environment:
+      MYSQL_DATABASE: fitness_tracker
+      MYSQL_USER: fitness_user
+      MYSQL_PASSWORD: fitness_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: fitness-tracker-app
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:mysql://db:3306/fitness_tracker
+      DB_USERNAME: fitness_user
+      DB_PASSWORD: fitness_pass
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
