@@ -21,7 +21,7 @@
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
         <div>
           <label class="label" for="name">FULL LEGAL NAME</label>
-          <input class="input" type="text" id="name" name="name" th:value="*{name}" placeholder="Shivank Verma" required maxlength="100"/>
+          <input class="input" type="text" id="name" name="name" th:value="*{name}" placeholder="Alex Carter" required maxlength="100"/>
           <div class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name error</div>
         </div>
         <div>
